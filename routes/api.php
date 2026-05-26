@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\ClasseController;
 use App\Http\Controllers\Api\V1\AuthController;
 
 Route::get('/user', function (Request $request) {
@@ -18,6 +19,11 @@ Route::prefix('v1')->group(function(){
 
         Route::middleware('role:admin,comptable')->get('/compta-data', function(){
             return response()->json(['message' => 'Voici les données financières.']);
+        });
+
+        Route::middleware('role:admin')->group(function(){
+            Route::get('/classes', [ClasseController::class, 'index']);
+            Route::post('/classes', [ClasseController::class, 'store']);
         });
     });
 });
