@@ -10,4 +10,14 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function(){
     Route::post('/login', [AuthController::class, 'login']);
+
+    Route::middleware('auth:sanctum')->group(function(){
+        Route::middleware('role:admin')->get('/admin-dashboard', function(){
+            return response()->json(['message' => 'Bienvenue dans l\'espace Admin !']);
+        });
+
+        Route::middleware('role:admin,comptable')->get('/compta-data', function(){
+            return response()->json(['message' => 'Voici les données financières.']);
+        });
+    });
 });
