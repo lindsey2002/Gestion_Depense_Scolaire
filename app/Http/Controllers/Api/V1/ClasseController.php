@@ -52,14 +52,33 @@ class ClasseController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $classe = Classe::findOrFail($id);
+
+        $request->validate([
+            'nom' => 'sometimes|required|string|max:255',
+            'niveau' => 'sometimes|required|string',
+            'tarif_mensuel' => 'sometimes|required|numeric|min:0',
+            'frais_inscription' => 'sometimes|required|numeric|min:0',
+        ]);
+
+        $classe->update($request->all());
+
+        return response()->json([
+            'message' => 'Classe modifiée avec succès !',
+            'classe' => $classe
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $classe = Classe::findOrFail($id);
+        $classe->delete(); // Supprime la classe (ou l'archive si Soft Delete est activé dessus)
+
+        return response()->json([
+            'message' => 'Classe supprimée avec succès.'
+        ], 200);
     }
 }

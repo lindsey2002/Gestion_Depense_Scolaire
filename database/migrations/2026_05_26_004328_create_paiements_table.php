@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('paiements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('eleve_id')->constrained('eleves')->onDelete('cascade');
-            $table->integer('montant');
-            $table->date('date');
+            $table->decimal('montant', 10, 2);
+            $table->date('date_paiement');
             $table->enum('mode_paiement', ['especes', 'orange_money', 'virement']);
+            $table->enum('type_paiement', ['inscription', 'mensualite']);
+            $table->string('mois')->nullable();
             $table->timestamps();
         });
     }

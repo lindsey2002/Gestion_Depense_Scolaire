@@ -41,34 +41,6 @@ class DatabaseSeeder extends Seeder
             'role' => 'parent',
         ]);
 
-        $classe1 = Classe::create([
-            'nom' => 'Informatique',
-            'niveau' => 'licence1',
-            'tarif_mensuel' => 50000,
-            'frais_inscription' => 120000,
-        ]);
-
-        $classe2 = Classe::create([
-            'nom' => 'Informatique',
-            'niveau' => 'licence2',
-            'tarif_mensuel' => 55000,
-            'frais_inscription' => 125000,
-        ]);
-
-        $eleve1 = Eleve::create([
-            'nom' => 'Diop',
-            'prenom' => 'Moussa',
-            'classe_id' => $classe1->id,
-            'parent_id' => $parent->id,
-        ]);
-
-        $eleve2 = Eleve::create([
-            'nom' => 'Diop',
-            'prenom' => 'Awa',
-            'classe_id' => $classe2->id,
-            'parent_id' => $parent->id,
-        ]);
-
         Depense::create([
             'categorie' => 'Fournitures',
             'montant' => 15000,

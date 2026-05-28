@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Paiement;
+use App\Models\Eleve;
 
 class Eleve extends Model
 {
@@ -16,6 +18,11 @@ class Eleve extends Model
     public function classe()
     {
         return $this->belongsTo(Classe::class);
+    }
+    /*  Obtenir les paiements de l'eleve. */
+    public function paiements()
+    {
+        return $this->hasMany(Paiement::class);
     }
 }
 
