@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->string('niveau');
+            $table->string('diminutif', 10);
+            $table->string('cursus', 5);
             $table->integer('tarif_mensuel');
             $table->integer('frais_inscription');
             $table->timestamps();

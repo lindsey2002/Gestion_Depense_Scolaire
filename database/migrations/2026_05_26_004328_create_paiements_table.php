@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('eleve_id')->constrained('eleves')->onDelete('cascade');
             $table->decimal('montant', 10, 2);
             $table->date('date_paiement');
+            $table->string('numero_recu')->unique();
             $table->enum('mode_paiement', ['especes', 'orange_money', 'virement']);
             $table->enum('type_paiement', ['inscription', 'mensualite']);
             $table->string('mois')->nullable();

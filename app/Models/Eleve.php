@@ -13,8 +13,9 @@ class Eleve extends Model
     use SoftDeletes;
     use HasFactory;
 
-    protected $fillable = ['matricule', 'nom', 'prenom', 'classe_id', 'parent_id'];
+    protected $fillable = ['matricule', 'nom', 'prenom', 'date_naissance', 'classe_id', 'statut', 'parent_id'];
 
+    protected $attributes = ['statut' => 'en_attente', ];
     public function classe()
     {
         return $this->belongsTo(Classe::class);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Eleve;
+use App\Models\Classe;
 use Illuminate\Http\Request;
 
 class EleveController extends Controller
@@ -23,12 +24,39 @@ class EleveController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'matricule' => 'required|string|unique:eleves,matricule',
             'nom' => 'required|string|max:255',
             'prenom' => 'required|string|max:255',
             'date_naissance' => 'required|date',
             'classe_id' => 'required|exists:classes,id',
         ]);
+
+        // on recupere la classe
+        $classe = Classe::findOrFail($request->classe_id);
+        
+        // extraction du niveau: ex "licence 2" -> on prend "lic" + le chiffre "2" = "lic3"
+        // on extrait le premier chiffre du niveau
+        $chiffreNiveau = preg_replace('/[^0-9]/', '', $classe->niveau);
+
+        // on prend les 3premieres lettres du niveau en minuscules ou majuscules
+        $lettreNiveau = ucfirst(strtolower(substr($classe->niveau, 0, 3)));
+        $prefixeNiveau = $lettreNiveau . $chiffreNiveau;
+
+        // recuperation directe des configurations de la classe
+        $diminutifFiliere = strtolower($classe->diminutif);
+        $cursus = strtolower($classe->cursus);
+
+        // les deux premieres lettres du prenom..
+
+        // compteur de chiffres aleatoires pour l'unicite
+        $anneeCourante = date('y');
+        $chiffresUnique = rand(1000, 9999);
+
+        // assemblage final
+            $matriculeGenere = $prefixeNiveau . $diminutifFiliere . $cursus . '-' . $anneeCourante . '-' . $chiffresUnique;
+
+        // enregistrement
+        $donnees = $request->all();
+        $donnees['matricule'] = $matriculeGenere;
 
         $eleve = Eleve::create($request->all());
 

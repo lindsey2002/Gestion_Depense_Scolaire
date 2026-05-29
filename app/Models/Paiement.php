@@ -11,7 +11,7 @@ class Paiement extends Model
 
     protected $fillable = [
         'eleve_id', 'montant', 'date_paiement',
-        'mode_paiement', 'type_paiement', 'mois'
+        'mode_paiement', 'type_paiement', 'mois', 'numero_recu'
     ];
 
     /* Un paiement appartien a un eleve. */

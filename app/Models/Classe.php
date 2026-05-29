@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Classe extends Model
 {
     //
-    protected $fillable = ['nom', 'niveau', 'tarif_mensuel', 'frais_inscription'];
+    protected $fillable = ['nom', 'niveau', 'diminutif', 'cursus', 'tarif_mensuel', 'frais_inscription'];
 }

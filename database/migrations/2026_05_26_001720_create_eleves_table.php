@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('eleves', function (Blueprint $table) {
             $table->id();
-            $table->string('matricule')->unique();
+            $table->string('matricule')->nullable()->unique();
             $table->string('nom');
+            $table->date('date_naissance');
+            $table->enum('statut', ['en_attente', 'inscrit'])->default('en_attente');
             $table->string('prenom');
             $table->foreignId('classe_id')->constrained('classes')->onDelete('cascade');
             $table->foreignId('parent_id')->nullable()->constrained('users')->onDelete('set null');
