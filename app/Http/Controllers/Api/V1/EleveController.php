@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Eleve;
 use App\Models\Classe;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
 class EleveController extends Controller
@@ -24,11 +25,20 @@ class EleveController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nom' => 'required|string|max:255',
+            'nom' => [
+                'required', 'string', 'max:255',
+                Rule::unique('eleves')->where(function ($query) use ($request){
+                    return  $query->where('prenom', $request->prenom)
+                                  ->where('date_naissance', $request->date_naissance);
+                })
+            ],
             'prenom' => 'required|string|max:255',
             'date_naissance' => 'required|date',
             'classe_id' => 'required|exists:classes,id',
-        ]);
+        ], [
+            'nom.unique' => "Un eleve avec ce nom, prenom et date naissance est deja inscrit. Si vous devez corriger une information, utilisez la modification.",
+        ]
+        );
 
         // on recupere la classe
         $classe = Classe::findOrFail($request->classe_id);

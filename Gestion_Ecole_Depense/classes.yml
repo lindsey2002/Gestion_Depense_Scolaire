@@ -1,11 +1,11 @@
 info:
-  name: eleve
+  name: classes
   type: http
   seq: 1
 
 http:
   method: POST
-  url: http://127.0.0.1:8000/api/v1/eleves
+  url: http://127.0.0.1:8000/api/v1/login
   auth: inherit
 
 settings:

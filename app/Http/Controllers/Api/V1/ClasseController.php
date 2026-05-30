@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Classe;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
 class ClasseController extends Controller
@@ -23,13 +24,21 @@ class ClasseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
         $request->validate([
-            'nom' => 'required|string|max:255',
+            'nom' => [
+                'required', 'string',
+                Rule::unique('classes')->where(function ($query) use ($request){
+                    return $query->where('niveau', $request->niveau);
+                })
+            ],
             'niveau' => 'required|string',
             'tarif_mensuel' => 'required|numeric|min:0',
             'frais_inscription' => 'required|numeric|min:0'
-        ]);
+        ], [
+            'nom.unique' => "Cette classe existe déjà. Veuillez supprimer ou modifier la classe existante.",
+        ]
+        );
 
         $classe = Classe::create($request->all());
 
