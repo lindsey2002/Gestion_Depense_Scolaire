@@ -34,7 +34,8 @@ class ClasseController extends Controller
             ],
             'niveau' => 'required|string',
             'tarif_mensuel' => 'required|numeric|min:0',
-            'frais_inscription' => 'required|numeric|min:0'
+            'frais_inscription' => 'required|numeric|min:0',
+            'vague_id' => 'nullable|exists:vagues,id',
         ], [
             'nom.unique' => "Cette classe existe déjà. Veuillez supprimer ou modifier la classe existante.",
         ]
@@ -68,6 +69,7 @@ class ClasseController extends Controller
             'niveau' => 'sometimes|required|string',
             'tarif_mensuel' => 'sometimes|required|numeric|min:0',
             'frais_inscription' => 'sometimes|required|numeric|min:0',
+            'vague_id' => 'nullable|exists:vagues,id',
         ]);
 
         $classe->update($request->all());

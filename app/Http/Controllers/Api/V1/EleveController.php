@@ -81,11 +81,12 @@ class EleveController extends Controller
         $eleve = Eleve::findOrFail($id);
 
         $request->validate([
-            'matricule' => 'sometimes|requires|string|unique:eleves,matricule,' . $id,
+            'matricule' => 'sometimes|required|string|unique:eleves,matricule,' . $id,
             'nom' => 'sometimes|required|string|max:255',
             'prenom' => 'sometimes|required|string|max:255',
             'date_naissance' => 'sometimes|required|date',
             'classe_id' => 'sometimes|required|exists:classes,id',
+            'statut'  => 'sometimes|required|string|in:en attente,inscrit,actif,abandon,suspendu',
         ]);
 
         $eleve->update($request->all());
@@ -109,9 +110,77 @@ class EleveController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function historique($id)
     {
-        //
+        $eleve = Eleve::with(['classe.vague', 'paiements'])->find($id);
+
+        if(! $eleve){
+            return response()->json([
+                'message' => "Eleve introuvable"
+            ], 404);
+        }
+
+        $vague = $eleve->classe->vague;
+        if(! $vague){
+            return response()->json([
+                'message' => "Impossible de generer l'echeancier: cette classe n'est rattachée a aucune vague de rentree."
+            ], 422);
+        }
+
+        $dateDebut = \Carbon\Carbon::parse($vague->date_debut);
+        $nombreMois = $vague->nombre_mois;
+
+        \Carbon\Carbon::setLocale('fr');        
+
+        $moisAnneeScolaire = [];
+
+        for($i = 0; $i < $nombreMois; $i++){
+            $moisAnneeScolaire[] = $dateDebut->copy()->addMonths($i)->translatedFormat('F');
+        }
+
+        /* ici on extrait la colonne 'mois' de la collection de ses
+         paiements, pluck('mois') va donner un tableau du genre: ['octobre',
+         'novembre', ..] */
+        $moisPayes = $eleve->paiements
+            ->where('type_paiement', 'mensualite')
+            ->whereNotNull('mois')
+            ->pluck('mois')
+            ->map(function($mois){
+                return strtolower(trim($mois));
+        })->toArray();
+
+        $echeancierMensuel = [];
+        
+        foreach ($moisAnneeScolaire as $mois){
+            $moisLower = strtolower($mois);
+            $echeancierMensuel[] = [
+                'mois' => ucfirst($mois),
+                'statut' => in_array($moisLower, $moisPayes) ? 'Payé' : 'Impayé'
+            ];
+        }
+
+        $totalVerse = $eleve->paiements->sum('montant');
+        $totalPensionVerse = $eleve->paiements->where('type_paiement', 'mensualite')->sum('montant');
+
+        return response()->json([
+            'eleve' => [
+                'id' => $eleve->id,
+                'matricule' => $eleve->matricule,
+                'prenom' => $eleve->prenom,
+                'nom' => $eleve->nom,
+                'classe' => $eleve->classe->nom . '' . $eleve->classe->niveau,
+                'statut_actuel' => $eleve->statut,
+                'vague_rentree' => $vague->nom
+            ],
+            'statistiques' => [
+                'total_general_verse' => $totalVerse,
+                'total_pension_verse' => $totalPensionVerse,
+                'nombre_mois_payes' => count($moisPayes),
+                'nombre_mois_dus' => $nombreMois,
+            ],
+            'echeancier_mensuel' => $echeancierMensuel,
+            'liste_recus' => $eleve->paiements
+        ], 200);
     }
 
 }

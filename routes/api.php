@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\EleveController;
 use App\Http\Controllers\Api\V1\ClasseController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DepenseController;
+use App\Http\Controllers\Api\V1\VagueController;
 
 
 Route::prefix('v1')->group(function(){
@@ -23,6 +24,10 @@ Route::prefix('v1')->group(function(){
             Route::post('/classes', [ClasseController::class, 'store']);
             Route::put('/classes/{id}', [ClasseController::class, 'update']);
             Route::delete('/classes/{id}', [ClasseController::class, 'destroy']);
+
+            Route::get('/vagues', [VagueController::class, 'index']);
+            Route::post('/vagues', [VagueController::class, 'store']);
+
         });
             
         // zone commune: admin et comptable
@@ -37,6 +42,7 @@ Route::prefix('v1')->group(function(){
             Route::post('/eleves', [EleveController::class, 'store']);
             Route::put('/eleves/{id}', [EleveController::class, 'update']);
             Route::delete('/eleves/{id}', [EleveController::class, 'destroy']);
+            Route::get('/eleves/{id}/historique', [EleveController::class, 'historique']);
 
             Route::get('/paiements', [PaiementController::class, 'index']);
             Route::post('/paiements', [PaiementController::class, 'store']);
