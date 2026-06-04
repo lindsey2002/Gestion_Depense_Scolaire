@@ -42,11 +42,17 @@ class DashboardController extends Controller
             $recettesVague = 0;
             $nombreElevesVague = 0;
 
-            foreach ($vague->classes as $classe) {
-                $nombreElevesVague += $classe->eleves->count();
+            if($vague->classes){
+                foreach ($vague->classes as $classe) {
+                    if ($classe->eleves) {
+                       $nombreElevesVague += $classe->eleves->count();
 
-                foreach ($classe->eleves as $eleve) {
-                    $recettesVague += $eleve->paiements->sum('montant');
+                       foreach ($classe->eleves as $eleve) {
+                            if ($eleve->paiements) {
+                                $recettesVague += $eleve->paiements->sum('montant');
+                            }
+                        }
+                    }
                 }
             }
 
