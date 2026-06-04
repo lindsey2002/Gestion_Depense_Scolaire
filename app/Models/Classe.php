@@ -12,6 +12,10 @@ class Classe extends Model
     public function vague(){
         return $this->belongsTo(Vague::class);
     }
+
+    public function eleves(){
+        return $this->hasMany(Eleve::class, 'classe_id');
+    }
 }
 
 

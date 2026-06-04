@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\ClasseController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DepenseController;
 use App\Http\Controllers\Api\V1\VagueController;
+use App\Http\Controllers\Api\V1\DashboardController;
 
 
 Route::prefix('v1')->group(function(){
@@ -48,6 +49,8 @@ Route::prefix('v1')->group(function(){
             Route::post('/paiements', [PaiementController::class, 'store']);
 
             Route::apiResource('depenses', DepenseController::class)->only(['index', 'store']);
+
+            Route::get('dashboard/stats', [DashboardController::class, 'index']);
         });
         
     });

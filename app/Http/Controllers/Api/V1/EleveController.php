@@ -62,7 +62,7 @@ class EleveController extends Controller
         $chiffresUnique = rand(1000, 9999);
 
         // assemblage final
-            $matriculeGenere = $prefixeNiveau . $diminutifFiliere . $cursus . '-' . $anneeCourante . '-' . $chiffresUnique;
+        $matriculeGenere = $prefixeNiveau . $diminutifFiliere . $cursus . '-' . $anneeCourante . '-' . $chiffresUnique;
 
         // enregistrement
         $donnees = $request->all();
