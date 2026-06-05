@@ -1,0 +1,117 @@
+<template>
+  <div class="bg-white p-6 max-w-md mx-auto border border-gray-300 rounded-lg shadow-sm print:border-none print:shadow-none" id="section-recu">
+    
+    <div class="text-center border-b border-gray-200 pb-4 mb-4">
+      <h2 class="text-xl font-black uppercase tracking-wide text-gray-800">ISI Suptech</h2>
+      <p class="text-xs text-gray-500">Application de Gestion de Pension Scolaire</p>
+      <p class="text-xs text-gray-400 mt-1">Date : {{ formatDialogueDate(paiement.date_paiement) }}</p>
+    </div>
+
+    <div class="bg-gray-50 p-2 text-center rounded mb-4 border border-gray-100">
+      <span class="text-xs text-gray-500 uppercase tracking-wider block">Numéro de Reçu</span>
+      <span class="font-mono font-bold text-gray-900">{{ paiement.numero_recu }}</span>
+    </div>
+
+    <div class="space-y-2 text-sm border-b border-gray-100 pb-4 mb-4">
+      <div class="flex justify-between">
+        <span class="text-gray-500">Élève :</span>
+        <span class="font-semibold text-gray-800">{{ eleve.prenom }} {{ eleve.nom }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">Matricule :</span>
+        <span class="font-mono text-gray-700">{{ eleve.matricule || 'En cours...' }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">Classe :</span>
+        <span class="text-gray-700">{{ eleve.classe?.nom }} ({{ eleve.classe?.vague?.nom }})</span>
+      </div>
+    </div>
+
+    <div class="space-y-2 text-sm border-b border-gray-100 pb-4 mb-4">
+      <div class="flex justify-between">
+        <span class="text-gray-500">Nature :</span>
+        <span class="font-medium capitalize text-gray-800">
+          {{ paiement.type_paiement === 'inscription' ? "Frais d'inscription" : "Mensualité" }}
+        </span>
+      </div>
+      <div v-if="paiement.type_paiement === 'mensualite'" class="flex justify-between">
+        <span class="text-gray-500">Mois réglé(s) :</span>
+        <span class="font-medium text-blue-700 capitalize text-right max-w-[200px] block">
+          {{ paiement.mois }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">Mode de versement :</span>
+        <span class="font-medium capitalize text-gray-700">{{ paiement.mode_paiement.replace('_', ' ') }}</span>
+      </div>
+    </div>
+
+    <div class="flex justify-between items-center bg-blue-50 p-3 rounded mb-6">
+      <span class="text-sm font-bold text-blue-900 uppercase">Montant Payé</span>
+      <span class="text-xl font-black text-blue-900">{{ formatDialogueCurrency(paiement.montant) }}</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-[10px] text-gray-400 pt-2 border-t border-dashed border-gray-200">
+      <div class="text-left">
+        <p>Signature Étudiant/Parent</p>
+        <div class="h-12"></div>
+      </div>
+      <div class="text-right">
+        <p>Signature Caisse (Compta)</p>
+        <div class="h-12"></div>
+      </div>
+    </div>
+
+    <div class="mt-6 text-center print:hidden">
+      <button 
+        @click="imprimerLeRecu"
+        class="w-full bg-gray-800 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-gray-900 transition flex items-center justify-center space-x-2"
+      >
+        <span>🖨️ Imprimer le reçu</span>
+      </button>
+    </div>
+
+  </div>
+</template>
+
+<script setup>
+defineProps({
+  paiement: { type: Object, required: true },
+  eleve: { type: Object, required: true }
+});
+
+const formatDialogueCurrency = (valeur) => {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', minimumFractionDigits: 0 }).format(valeur);
+};
+
+const formatDialogueDate = (dateString) => {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+};
+
+const imprimerLeRecu = () => {
+  window.print();
+};
+</script>
+
+<style scoped>
+@media print {
+  /* Masque tout le reste du site (barre de navigation, boutons extérieurs) */
+  body * {
+    visibility: hidden;
+  }
+  /* Rend uniquement le bloc du reçu visible */
+  #section-recu, #section-recu * {
+    visibility: visible;
+  }
+  #section-recu {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+  }
+}
+</style>
