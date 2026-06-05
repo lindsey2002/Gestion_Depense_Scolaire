@@ -183,4 +183,23 @@ class EleveController extends Controller
         ], 200);
     }
 
+    public function show(Request $request, $id)
+{
+    $query = Eleve::query();
+
+    // Gestion dynamique des relations demandées par Vue (?include=paiements,classe.vague)
+    if ($request->has('include')) {
+        $relations = explode(',', $request->input('include'));
+        $query->with($relations);
+    }
+
+    $eleve = $query->find($id);
+
+    if (!$eleve) {
+        return response()->json(['message' => 'Élève introuvable'], 404);
+    }
+
+    return response()->json($eleve);
+}
+
 }

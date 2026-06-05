@@ -42,6 +42,7 @@ Route::prefix('v1')->group(function(){
 
             Route::get('/eleves', [EleveController::class, 'index']);
             Route::post('/eleves', [EleveController::class, 'store']);
+            Route::get('/eleves/{id}', [EleveController::class, 'show']);
             Route::put('/eleves/{id}', [EleveController::class, 'update']);
             Route::delete('/eleves/{id}', [EleveController::class, 'destroy']);
             Route::get('/eleves/{id}/historique', [EleveController::class, 'historique']);

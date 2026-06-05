@@ -14,8 +14,7 @@ class ClasseController extends Controller
      */
     public function index()
     {
-        //
-        $classes = Classe::all();
+        $classes = Classe::with('vague')->get();
         return response()->json($classes, 200);
     }
 
