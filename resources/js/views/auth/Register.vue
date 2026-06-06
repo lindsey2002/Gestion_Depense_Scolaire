@@ -15,17 +15,17 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Adresse Email</label>
-          <input v-model="form.email" type="email" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
+          <input v-model="form.email" type="email" autocomplete="email" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Mot de passe</label>
-          <input v-model="form.password" type="password" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
+          <input v-model="form.password" type="password" autocomplete="new-password" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
-          <input v-model="form.password_confirmation" type="password" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
+          <input v-model="form.password_confirmation" type="password" autocomplete="new-password" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
         </div>
 
         <button type="submit" :disabled="loading" class="w-full bg-orange-600 text-white p-2.5 rounded-lg font-bold hover:bg-orange-700 transition duration-200">

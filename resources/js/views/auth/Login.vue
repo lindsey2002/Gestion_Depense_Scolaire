@@ -10,12 +10,12 @@
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700">Adresse Email</label>
-          <input v-model="form.email" type="email" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
+          <input v-model="form.email" type="email" autocomplete="email" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Mot de passe</label>
-          <input v-model="form.password" type="password" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
+          <input v-model="form.password" type="password" autocomplete="current-password" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
         </div>
 
         <button type="submit" :disabled="loading" class="w-full bg-orange-600 text-white p-2.5 rounded-lg font-bold hover:bg-orange-700 transition duration-200">
@@ -49,20 +49,32 @@ const handleLogin = async () => {
         loading.value = true;
         error.value = null;
         
-        // 1. On appelle TA vraie route API avec le préfixe v1
+        // 1. Appel de l'API de connexion
         const response = await axios.post('/api/v1/login', form.value);
         
-        // 2. On récupère le token renvoyé par ton AuthController
+        // 2. Extraction du token et des infos de l'utilisateur (dont son rôle)
         const token = response.data.access_token;
+        const role = response.data.user?.role; // Récupère 'admin' ou 'comptable' depuis le user backend
         
-        // 3. On le stocke solidement dans le navigateur
+        // 3. Stockage local des données de session
         localStorage.setItem('auth_token', token);
+        if (role) {
+            localStorage.setItem('user_role', role); // Sauvegarde du rôle pour sécuriser tes pages
+        }
         
-        // 4. On dit à Axios de l'utiliser pour TOUTES les prochaines requêtes
+        // 4. Configuration globale du header d'autorisation Axios
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
-        // 5. Redirection vers le tableau de bord
-        router.push('/compta/dashboard');
+        // 5. 🎯 L'AIGUILLAGE DYNAMIQUE SELON LE RÔLE
+        if (role === 'admin') {
+            router.push('/admin/dashboard');
+        } else if (role === 'comptable') {
+            router.push('/compta/dashboard');
+        } else {
+            // Sécurité : si aucun rôle ne correspond ou n'est renvoyé
+            router.push('/compta/dashboard'); 
+        }
+
     } catch (err) {
         console.error(err);
         error.value = err.response?.data?.message || "Identifiants incorrects.";

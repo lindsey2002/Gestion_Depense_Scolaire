@@ -7,8 +7,29 @@
       <p class="text-gray-500 mt-4">Chargement du dossier de l'élève...</p>
     </div>
 
+    
+
     <!-- BLOC PRINCIPAL -->
     <div v-else-if="currentEleve" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      
+      <div class="px-8 pt-6 pb-2 bg-slate-50 border-b border-slate-100">
+        <button 
+          @click="$router.back()" 
+          class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors duration-200 group"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform duration-200" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            stroke-width="2.5"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Retour à la liste des élèves</span>
+        </button>
+      </div>
       
       <!-- ═══ EN-TÊTE ÉLÈVE ═══ -->
       <div style="background: linear-gradient(135deg, #1e3a5f 0%, #1e4d8c 60%, #2563a8 100%); padding: 1.75rem 2rem;">

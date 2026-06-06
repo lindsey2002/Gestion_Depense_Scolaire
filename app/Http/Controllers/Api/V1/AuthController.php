@@ -38,4 +38,14 @@ class AuthController extends Controller
             ]
         ], 200);
     }
+
+    public function logout(Request $request)
+{
+    // Révoque le token qui a servi à la requête actuelle
+    $request->user()->currentAccessToken()->delete();
+
+    return response()->json([
+        'message' => 'Déconnexion réussie avec succès.'
+    ]);
+}
 }

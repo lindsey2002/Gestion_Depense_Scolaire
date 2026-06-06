@@ -30,6 +30,13 @@ Route::prefix('v1')->group(function(){
             Route::get('/vagues', [VagueController::class, 'index']);
             Route::post('/vagues', [VagueController::class, 'store']);
 
+            Route::get('/admin/dashboard/kpi', [DashboardController::class, 'getKpis']);
+            Route::get('/admin/dashboard/charts', [DashboardController::class, 'getCharts']);
+            Route::get('/admin/dashboard/classes', [DashboardController::class, 'getClasses']);
+
+            Route::get('/dashboard/criteres-recherche', [DashboardController::class, 'getCriteresRecherche']);
+            Route::get('/dashboard/detail-classe', [DashboardController::class, 'getDetailClasse']);
+
         });
             
         // zone commune: admin et comptable
@@ -38,6 +45,8 @@ Route::prefix('v1')->group(function(){
                 return response()->json(['message' => 'Voici les données financières.']);
             });
 
+            Route::post('/logout', [AuthController::class, 'logout']);
+            
             Route::get('/classes', [ClasseController::class, 'index']);
 
             Route::get('/eleves', [EleveController::class, 'index']);
@@ -50,7 +59,8 @@ Route::prefix('v1')->group(function(){
             Route::get('/paiements', [PaiementController::class, 'index']);
             Route::post('/paiements', [PaiementController::class, 'store']);
 
-            Route::apiResource('depenses', DepenseController::class)->only(['index', 'store']);
+            Route::get('/depenses/export', [DepenseController::class, 'exportExcel']);
+            Route::apiResource('depenses', DepenseController::class)->only(['index', 'store', 'update','destroy']);
 
             Route::get('dashboard/stats', [DashboardController::class, 'index']);
         });

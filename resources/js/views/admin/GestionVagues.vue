@@ -1,7 +1,24 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen">
     <div class="max-w-6xl mx-auto space-y-6">
-      
+      <div class="mb-6 max-w-7xl mx-auto px-6 pt-4">
+  <router-link 
+    to="/admin/dashboard" 
+    class="inline-flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-emerald-400 transition-colors duration-200 group"
+  >
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      class="h-5 w-5 transform group-hover:-translate-x-1 transition-transform duration-200" 
+      fill="none" 
+      viewBox="0 0 24 24" 
+      stroke="currentColor" 
+      stroke-width="2.5"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    </svg>
+    <span>Retour au tableau de bord</span>
+  </router-link>
+</div>
       <div class="flex justify-between items-center">
         <div>
           <h1 class="text-3xl font-bold text-gray-800">Gestion des Vagues de Rentrée</h1>
