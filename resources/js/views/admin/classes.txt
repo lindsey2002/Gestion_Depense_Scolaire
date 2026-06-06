@@ -1,169 +1,117 @@
 <template>
-  <div class="p-6 bg-gray-50 min-h-screen">
-    <div class="max-w-6xl mx-auto space-y-6">
-      
-      <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-800">Configuration des Classes</h1>
-        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">Espace Admin</span>
-      </div>
-
-      <div v-if="error" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-semibold">{{ error }}</div>
-      <div v-if="success" class="bg-green-50 text-green-600 p-3 rounded-lg text-sm font-semibold">{{ success }}</div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
-          <h2 class="text-xl font-bold text-gray-700 mb-4">Ajouter une classe</h2>
-          <form @submit.prevent="handleCreateClasse" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Associer à une Vague de rentrée</label>
-              <select v-model="form.vague_id" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                <option value="" disabled>Sélectionnez une vague</option>
-                <option v-for="vague in vagues" :key="vague.id" :value="vague.id">
-                  {{ vague.nom }} (Début : {{ vague.date_debut }})
-                </option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Nom de la classe</label>
-              <input v-model="form.nom" type="text" placeholder="ex: Licence 3 Informatique" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Montant de la scolarité (FCFA)</label>
-              <input v-model="form.montant_scolarite" type="number" placeholder="ex: 500000" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-            </div>
-
-            <button type="submit" :disabled="loadingBtn" class="w-full bg-blue-600 text-white p-2.5 rounded-lg font-bold hover:bg-blue-700 transition duration-200">
-              {{ loadingBtn ? 'Création...' : 'Enregistrer la classe' }}
-            </button>
-          </form>
-        </div>
-
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div class="p-6 border-b border-gray-100">
-            <h2 class="text-xl font-bold text-gray-700">Liste des classes existantes</h2>
-          </div>
-
-          <div v-if="loadingTable" class="p-6 text-center text-gray-500">Chargement des données...</div>
-
-          <div v-else-if="classes.length === 0" class="p-6 text-center text-gray-500">Aucune classe configurée pour le moment.</div>
-
-          <table v-else class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-gray-50 text-gray-600 uppercase text-xs font-bold border-b border-gray-100">
-                <th class="p-4">ID</th>
-                <th class="p-4">Nom de la vague</th>
-                <th class="p-4">Nom de la classe</th>
-                <th class="p-4">Montant Scolarité</th>
-                <th class="p-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 text-gray-700">
-              <tr v-for="classe in classes" :key="classe.id" class="hover:bg-gray-50 transition">
-                <td class="p-4 font-semibold text-gray-500">#{{ classe.id }}</td>
-                <td class="p-4 font-semibold text-gray-600">
-                  {{ classe.vague ? classe.vague.nom : 'Aucune vague' }}
-                </td>
-                <td class="p-4 font-bold text-gray-800">{{ classe.nom }}</td>
-                <td class="p-4 font-semibold text-gray-700">
-                    <div class="text-sm font-bold text-blue-600">{{ classe.tarif_mensuel }} FCFA / mois</div>
-                    <div class="text-xs text-gray-500">Inscription : {{ classe.frais_inscription }} FCFA</div>
-                </td>
-                <td class="p-4 text-center">
-                  <button @submit.prevent="" class="text-red-600 hover:text-red-900 font-bold text-sm mx-2">Supprimer</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+  <div class="bg-white p-6 max-w-md mx-auto border border-gray-300 rounded-lg shadow-sm print:border-none print:shadow-none" id="section-recu">
+    
+    <div class="text-center border-b border-gray-200 pb-4 mb-4">
+      <h2 class="text-xl font-black uppercase tracking-wide text-gray-800">ISI Suptech</h2>
+      <p class="text-xs text-gray-500">Application de Gestion de Pension Scolaire</p>
+      <p class="text-xs text-gray-400 mt-1">Date : {{ formatDialogueDate(paiement.date_paiement) }}</p>
     </div>
+
+    <div class="bg-gray-50 p-2 text-center rounded mb-4 border border-gray-100">
+      <span class="text-xs text-gray-500 uppercase tracking-wider block">Numéro de Reçu</span>
+      <span class="font-mono font-bold text-gray-900">{{ paiement.numero_recu }}</span>
+    </div>
+
+    <div class="space-y-2 text-sm border-b border-gray-100 pb-4 mb-4">
+      <div class="flex justify-between">
+        <span class="text-gray-500">Élève :</span>
+        <span class="font-semibold text-gray-800">{{ eleve.prenom }} {{ eleve.nom }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">Matricule :</span>
+        <span class="font-mono text-gray-700">{{ eleve.matricule || 'En cours...' }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">Classe :</span>
+        <span class="text-gray-700">{{ eleve.classe?.nom }} ({{ eleve.classe?.vague?.nom }})</span>
+      </div>
+    </div>
+
+    <div class="space-y-2 text-sm border-b border-gray-100 pb-4 mb-4">
+      <div class="flex justify-between">
+        <span class="text-gray-500">Nature :</span>
+        <span class="font-medium capitalize text-gray-800">
+          {{ paiement.type_paiement === 'inscription' ? "Frais d'inscription" : "Mensualité" }}
+        </span>
+      </div>
+      <div v-if="paiement.type_paiement === 'mensualite'" class="flex justify-between">
+        <span class="text-gray-500">Mois réglé(s) :</span>
+        <span class="font-medium text-blue-700 capitalize text-right max-w-[200px] block">
+          {{ paiement.mois }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500">Mode de versement :</span>
+        <span class="font-medium capitalize text-gray-700">{{ paiement.mode_paiement.replace('_', ' ') }}</span>
+      </div>
+    </div>
+
+    <div class="flex justify-between items-center bg-blue-50 p-3 rounded mb-6">
+      <span class="text-sm font-bold text-blue-900 uppercase">Montant Payé</span>
+      <span class="text-xl font-black text-blue-900">{{ formatDialogueCurrency(paiement.montant) }}</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-[10px] text-gray-400 pt-2 border-t border-dashed border-gray-200">
+      <div class="text-left">
+        <p>Signature Étudiant/Parent</p>
+        <div class="h-12"></div>
+      </div>
+      <div class="text-right">
+        <p>Signature Caisse (Compta)</p>
+        <div class="h-12"></div>
+      </div>
+    </div>
+
+    <div class="mt-6 text-center print:hidden">
+      <button 
+        @click="imprimerLeRecu"
+        class="w-full bg-gray-800 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-gray-900 transition flex items-center justify-center space-x-2"
+      >
+        <span>🖨️ Imprimer le reçu</span>
+      </button>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-
-const classes = ref([]);
-const vagues = ref([]);
-const loadingTable = ref(false);
-const loadingBtn = ref(false);
-const error = ref(null);
-const success = ref(null);
-
-const form = ref({
-    nom: '',
-    niveau: 'licence 1', // Valeur par défaut
-    diminutif: '',
-    cursus: 'cs',        // Valeur par défaut
-    vague_id: '',         // Valeur par défaut
-    tarif_mensuel: '',
-    frais_inscription: ''
+defineProps({
+  paiement: { type: Object, required: true },
+  eleve: { type: Object, required: true }
 });
 
-// Récupérer la liste des classes avec le Token Bearer et le préfixe v1
-const fetchClasses = async () => {
-    try {
-        loadingTable.value = true;
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('/api/v1/classes', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        classes.value = response.data; 
-    } catch (err) {
-        console.error(err);
-        error.value = "Impossible de charger la liste des classes.";
-    } finally {
-        loadingTable.value = false;
-    }
+const formatDialogueCurrency = (valeur) => {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', minimumFractionDigits: 0 }).format(valeur);
 };
 
-const fetchVagues = async () => {
-    try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('/api/v1/vagues', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        vagues.value = response.data;
-    } catch (err) {
-        console.error("Erreur lors du chargement des vagues :", err);
-    }
+const formatDialogueDate = (dateString) => {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
 };
 
-// On enregistre une nouvelle classe (Route POST /api/v1/classes)
-const handleCreateClasse = async () => {
-    try {
-        loadingBtn.value = true;
-        error.value = null;
-        success.value = null;
-        
-        const token = localStorage.getItem('auth_token');
-        await axios.post('/api/v1/classes', form.value, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-        success.value = "La classe a été créée avec succès !";
-        form.value.nom = '';
-        form.value.diminutif = '';
-        form.value.vague_id = '';
-        form.value.tarif_mensuel = '';
-        form.value.frais_inscription = '';
-        
-        // On rafraîchit la liste immédiatement
-        await fetchClasses();
-    } catch (err) {
-        console.error(err);
-        error.value = err.response?.data?.message || "Erreur lors de la création de la classe.";
-    } finally {
-        loadingBtn.value = false;
-    }
+const imprimerLeRecu = () => {
+  window.print();
 };
-
-// Charger les données au chargement de la page
-onMounted(() => {
-    fetchClasses();
-    fetchVagues();
-});
 </script>
+
+<style scoped>
+@media print {
+  /* Masque tout le reste du site (barre de navigation, boutons extérieurs) */
+  body * {
+    visibility: hidden;
+  }
+  /* Rend uniquement le bloc du reçu visible */
+  #section-recu, #section-recu * {
+    visibility: visible;
+  }
+  #section-recu {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+  }
+}
+</style>

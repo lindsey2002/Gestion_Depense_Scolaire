@@ -1,5 +1,17 @@
 <template>
   <div class="p-6 max-w-xl mx-auto">
+    <div class="mb-4">
+      <button 
+        @click="$router.push({ name: 'ComptaDashboard' })" 
+        class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors group"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Retour au Tableau de bord
+      </button>
+    </div>
+    
     <h2 class="text-2xl font-bold mb-6 text-gray-800">Rechercher un élève pour encaissement</h2>
 
     <!-- Barre de recherche -->

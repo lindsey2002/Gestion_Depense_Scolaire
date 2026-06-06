@@ -10,11 +10,7 @@ import GestionPaiements from "../views/compta/GestionPaiements.vue";
 
 // on definit les routes cad les correspondances entre url et pages
 const routes = [
-    {
-        path: '/compta/dashboard',
-        name: 'ComptaDashboard',
-        component: DashboardCompta
-    },
+    // ═══ ACCÈS PUBLIC / AUTHENTIFICATION ═══
     {
         path: '/login',
         name: 'Login',
@@ -25,61 +21,71 @@ const routes = [
         name: 'register',
         component: Register
     },
-    {
-        path: '/admin/gestionclasses',
-        name: 'GestionClasses',
-        component: GestionClasses
-    },
-    {
-        path: '/compta/inscription-eleve',
-        name: 'InscriptionEleve',
-        component: InscriptionEleve
-    },
-    {
-        path: '/admin/gestionvagues',
-        name: 'GestionVagues',
-        component: GestionVagues
-    },
-    {
-        path: '/compta/paiements',
-        name: 'GestionPaiements',
-        component: GestionPaiements,
-        props: true
-    },
-    {
-        path: '/compta/recherche',
-        name: 'compta.recherche',
-        component: () => import('../views/compta/RechercheEleve.vue')
-    },
-    {
-        path: '/compta/paiement/:id', // L'URL finale ressemblera à /compta/paiement/1
-        name: 'compta.paiement',      // C'EST CE NOM QUE VUE-ROUTER CHERCHE !
-        component: () => import('@/views/compta/GestionPaiements.vue'),
-        props: true
-    },
-    {
-        path: '/compta/depenses',
-        name: 'compta.depenses',
-        component: () => import('@/views/compta/GestionDepenses.vue')
-    },
+
+    // ═══ ESPACE ADMINISTRATEUR (Protégé) ═══
     {
         path: '/admin/dashboard',
         name: 'admin.dashboard',
         component: () => import('@/views/admin/DashboardAdmin.vue'),
-        meta: { requiresAuth: true }
-        // Ajoute ici tes méta pour protéger la route plus tard
+        meta: { requiresAuth: true, role: 'admin' }
+    },
+    {
+        path: '/admin/gestionclasses',
+        name: 'GestionClasses',
+        component: GestionClasses, // Gardé tel quel selon ton import du haut
+        meta: { requiresAuth: true, role: 'admin' }
+    },
+    {
+        path: '/admin/gestionvagues',
+        name: 'GestionVagues',
+        component: GestionVagues, // Gardé tel quel selon ton import du haut
+        meta: { requiresAuth: true, role: 'admin' }
     },
     {
         path: '/admin/classes/recherche',
         name: 'admin.classes.recherche',
-        component: () => import('@/views/admin/RechercheClasse.vue')
+        component: () => import('@/views/admin/RechercheClasse.vue'),
+        meta: { requiresAuth: true, role: 'admin' }
     },
     {
         path: '/admin/detailclasse',
         name: 'admin.detailclasse',
         component: () => import('@/views/admin/DetailClasse.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, role: 'admin' }
     },
+
+    // ═══ ESPACE COMPTABILITÉ (Protégé) ═══
+    {
+        path: '/compta/dashboard',
+        name: 'ComptaDashboard',
+        component: DashboardCompta, // Gardé tel quel selon ton import du haut
+        meta: { requiresAuth: true, role: 'comptable' }
+    },
+    {
+        path: '/compta/inscription-eleve',
+        name: 'InscriptionEleve',
+        component: InscriptionEleve,
+        meta: { requiresAuth: true, role: 'comptable' }
+    },
+    {
+        path: '/compta/rechercheeleve', // Aligné sur le "to" de ta carte Encaisser
+        name: 'compta.rechercheeleve',
+        component: () => import('../views/compta/RechercheEleve.vue'),
+        meta: { requiresAuth: true, role: 'comptable' }
+    },
+    {
+        path: '/compta/paiement/:id', // L'entonnoir après la recherche d'élève
+        name: 'compta.paiement',
+        component: () => import('@/views/compta/GestionPaiements.vue'),
+        props: true,
+        meta: { requiresAuth: true, role: 'comptable' }
+    },
+    {
+        path: '/compta/gestiondepense', // Aligné sur le "to" de ta carte Dépenses
+        name: 'compta.gestiondepense',
+        component: () => import('@/views/compta/GestionDepenses.vue'),
+        meta: { requiresAuth: true, role: 'comptable' }
+    }
 ];
 
 const router = createRouter({

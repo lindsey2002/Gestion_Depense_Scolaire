@@ -30,7 +30,7 @@
           <span>Retour à la liste des élèves</span>
         </button>
       </div>
-      
+
       <!-- ═══ EN-TÊTE ÉLÈVE ═══ -->
       <div style="background: linear-gradient(135deg, #1e3a5f 0%, #1e4d8c 60%, #2563a8 100%); padding: 1.75rem 2rem;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem">
@@ -84,7 +84,7 @@
 
         <div class="text-center mt-6 print:hidden">
           <router-link 
-            :to="{ name: 'compta.recherche' }" 
+            :to="{ name: 'compta.rechercheeleve' }" 
             class="px-5 py-2.5 text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl transition inline-block"
           >
             ← Retourner à la recherche
@@ -174,7 +174,7 @@
 
           <div class="flex items-center justify-end space-x-3 border-t border-slate-100 pt-5">
             <router-link 
-              :to="{ name: 'compta.recherche' }" 
+              :to="{ name: 'compta.rechercheeleve' }" 
               class="px-5 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-100 rounded-xl transition"
             >
               Annuler
@@ -198,7 +198,7 @@
     <!-- ERREUR DE ROUTE -->
     <div v-else class="text-center py-12 bg-white rounded-xl border border-slate-200">
       <p class="text-slate-500 font-medium">Une erreur est survenue lors de la récupération des données.</p>
-      <router-link :to="{ name: 'compta.recherche' }" class="mt-4 inline-block text-blue-600 font-semibold hover:underline">
+      <router-link :to="{ name: 'compta.rechercheeleve' }" class="mt-4 inline-block text-blue-600 font-semibold hover:underline">
         Retourner à la recherche
       </router-link>
     </div>
