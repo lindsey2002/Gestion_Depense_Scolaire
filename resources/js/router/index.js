@@ -94,18 +94,13 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  // 1. On vérifie si la page demandée nécessite d'être connecté
   const pageProtegee = to.matched.some(record => record.meta.requiresAuth)
   
-  // 2. On vérifie si le token existe toujours dans le localStorage
   const estConnecte = localStorage.getItem('auth_token')
 
-  // 3. Si la page est protégée et que le token n'existe plus (ex: après déconnexion)
   if (pageProtegee && !estConnecte) {
-    // On refuse l'accès et on force la redirection vers le login
-    next('/login')
+    return '/login'
   } else {
-    // Sinon, on laisse passer normalement
     next()
   }
 })

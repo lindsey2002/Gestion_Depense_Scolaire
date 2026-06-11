@@ -11,25 +11,28 @@
         </div>
         
         <div class="flex flex-wrap items-center gap-3">
-          <router-link :to="{ name: 'compta.rechercheeleve' }" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-    </svg>
-    Encaisser un élève
-  </router-link>
+          <router-link to="/compta/rechercheeleve" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Encaisser un élève
+          </router-link>
 
-          <router-link to="/compta/gestiondepense" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-all duration-200">
+          <router-link :to="{ name: 'compta.gestiondepense' }" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-all duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             Journal de Caisse
           </router-link>
 
-          <button @click="exporterExcel" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white border border-emerald-500/20 rounded-lg transition-all duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Exporter Excel
+          <button @click="exportExcel" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white border border-emerald-500/20 rounded-lg transition-all duration-200">
+            <span v-if="exporting">⏳ Génération...</span>
+            <template v-else>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Exporter Excel
+            </template>
           </button>
 
           <button @click="gererDeconnexion" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-400 bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 rounded-lg transition-all duration-200">
@@ -166,11 +169,45 @@ const fetchDashboardData = async () => {
     }
 };
 
-// Logique d'exportation Excel brute
-const exporterExcel = () => {
+const exportExcel = async () => {
+  try {
     const token = localStorage.getItem('auth_token');
-    // On force le téléchargement direct via l'endpoint de ton API Laravel
-    window.open(`/api/v1/finance/export-excel?token=${token}`, '_blank');
+    
+    if (!token) {
+      alert("Session expirée. Veuillez vous reconnecter.");
+      return;
+    }
+
+    // Appel avec l'URL exacte validée par ton fichier api.php
+    const response = await axios.get('/api/v1/compta/exporter-excel', {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      responseType: 'blob' // Indispensable pour récupérer le fichier Excel binaire
+    });
+    
+    // Traitement du téléchargement du fichier
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'ISI_Suivi_Comptable.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    
+    // Nettoyage de la mémoire
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error("Détails de l'erreur d'exportation :", err);
+    
+    if (err.response && err.response.status === 401) {
+      alert("Votre session a expiré. Reconnectez-vous pour exporter le fichier.");
+    } else {
+      alert("Erreur lors de la génération du fichier Excel. Vérifiez que le serveur Laravel tourne bien.");
+    }
+  }
 };
 
 // Logique de déconnexion sécurisée (Nettoyage + Redirection)

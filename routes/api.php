@@ -46,7 +46,7 @@ Route::prefix('v1')->group(function(){
             });
 
             Route::post('/logout', [AuthController::class, 'logout']);
-            
+
             Route::get('/classes', [ClasseController::class, 'index']);
 
             Route::get('/eleves', [EleveController::class, 'index']);
@@ -61,6 +61,8 @@ Route::prefix('v1')->group(function(){
 
             Route::get('/depenses/export', [DepenseController::class, 'exportExcel']);
             Route::apiResource('depenses', DepenseController::class)->only(['index', 'store', 'update','destroy']);
+
+            Route::get('/compta/exporter-excel', [PaiementController::class, 'exportExcel']);
 
             Route::get('dashboard/stats', [DashboardController::class, 'index']);
         });

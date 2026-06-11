@@ -11,20 +11,25 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <a href="/admin/gestionclasses" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 border border-gray-600">
-            Gestion Classes
-          </a>
+          <router-link to="/admin/gestionclasses" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 border border-gray-600">
+    Gestion Classes 
+  </router-link>
 
-          <a href="/admin/gestionvagues" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 border border-gray-600">
-            Gestion Vagues
-          </a>
+          <router-link to="/admin/gestionvagues" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 border border-gray-600">
+    Gestion Vagues
+  </router-link>
 
-          <a href="/eleves/inscriptioneleve" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg shadow-emerald-950/20 transition-all duration-200 transform hover:-translate-y-0.5">
+          <router-link to="/compta/inscription-eleve" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg shadow-emerald-950/20 transition-all duration-200 transform hover:-translate-y-0.5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Nouvel Étudiant
-          </a>
+          </router-link>
+
+          <button @click="exportExcelAdmin" :disabled="exporting" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white rounded-lg border border-emerald-500/20 transition-all duration-200">
+  <span v-if="exporting">⏳ ...</span>
+  <span v-else>📊 Export Excel</span>
+</button>
 
           <button 
   @click="gererDeconnexion" 
@@ -54,6 +59,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import axios from 'axios'
 
 // Importation des composants découpés depuis le dossier js/components/
 import KpiCards from '@/components/KpiCards.vue'
@@ -61,14 +67,11 @@ import StatCharts from '@/components/StatCharts.vue'
 import ClassesTable from '@/components/ClassesTable.vue'
 import { useRouter } from 'vue-router'
 
-/**
- * Propriété calculée pour l'année académique.
- * Elle évite d'écrire l'année en dur dans le HTML et s'adapte automatiquement.
- */
+
 const anneeAcademique = computed(() => {
   const dateActuelle = new Date()
   const anneeEnCours = dateActuelle.getFullYear()
-  const moisEnCours = dateActuelle.getMonth() // 0 = Janvier, 5 = Juin, 8 = Septembre
+  const moisEnCours = dateActuelle.getMonth() 
 
   // Si on est à partir de septembre (mois >= 8), l'année scolaire est anneeEnCours / anneeEnCours + 1
   if (moisEnCours >= 8) {
@@ -80,6 +83,37 @@ const anneeAcademique = computed(() => {
 })
 
 const router = useRouter()
+const exporting = ref(false)
+
+const exportExcelAdmin = async () => {
+  try {
+    exporting.value = true
+    const token = localStorage.getItem('auth_token')
+    
+    const response = await axios.get('/api/v1/compta/exporter-excel', {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      responseType: 'blob'
+    })
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'ISI_Suivi_Admin.xlsx')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error("Erreur export admin :", err)
+  } finally {
+    exporting.value = false
+  }
+}
+
+
 const gererDeconnexion = async () => {
   try {
     const token = localStorage.getItem('auth_token')
@@ -95,12 +129,11 @@ const gererDeconnexion = async () => {
   } catch (error) {
     console.error("Erreur lors de la déconnexion serveur :", error)
   } finally {
-    // 2. Nettoyage local IMPÉRATIF (même si le serveur est KO)
     localStorage.removeItem('auth_token')
     localStorage.removeItem('user_role')
     
     // 3. Redirection immédiate vers la page de connexion
-    router.push('/login') // Ajuste le chemin selon ta route de Login
+    router.push('/login') 
   }
 }
 </script>
