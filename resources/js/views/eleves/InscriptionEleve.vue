@@ -60,7 +60,7 @@ const success = ref(null);
 const form = ref({
     nom: '',
     prenom: '',
-    date_naissance: '', // Synchronisé avec la validation Laravel
+    date_naissance: '', 
     classe_id: ''
 });
 

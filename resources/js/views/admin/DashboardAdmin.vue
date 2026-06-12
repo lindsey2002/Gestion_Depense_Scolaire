@@ -18,14 +18,13 @@
           <router-link to="/admin/gestionvagues" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 border border-gray-600">
     Gestion Vagues
   </router-link>
-
-          <router-link to="/compta/inscription-eleve" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg shadow-emerald-950/20 transition-all duration-200 transform hover:-translate-y-0.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Nouvel Étudiant
-          </router-link>
-
+<router-link to="/admin/register" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+  </svg>
+  Inscrire Agent
+</router-link>
+          
           <button @click="exportExcelAdmin" :disabled="exporting" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white rounded-lg border border-emerald-500/20 transition-all duration-200">
   <span v-if="exporting">⏳ ...</span>
   <span v-else>📊 Export Excel</span>

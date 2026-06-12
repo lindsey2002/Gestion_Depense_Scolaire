@@ -48,30 +48,31 @@ const handleLogin = async () => {
     try {
         loading.value = true;
         error.value = null;
-        
-        // 1. Appel de l'API de connexion
         const response = await axios.post('/api/v1/login', form.value);
+
+        localStorage.setItem('auth_token', response.data.token);
+        localStorage.setItem('user_name', response.data.user.name);
+        localStorage.setItem('user_email', response.data.user.email);
         
-        // 2. Extraction du token et des infos de l'utilisateur (dont son rôle)
-        const token = response.data.access_token;
-        const role = response.data.user?.role; // Récupère 'admin' ou 'comptable' depuis le user backend
-        
-        // 3. Stockage local des données de session
+        const token = response.data.access_token || response.data.token;
+        const role = response.data.user?.role;
+        const name = response.data.user?.name || 'Gestionnaire ISI';
+        const email = response.data.user?.email || '';
+            
         localStorage.setItem('auth_token', token);
         if (role) {
-            localStorage.setItem('user_role', role); // Sauvegarde du rôle pour sécuriser tes pages
+            localStorage.setItem('user_role', role); 
         }
         
-        // 4. Configuration globale du header d'autorisation Axios
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
-        // 5. 🎯 L'AIGUILLAGE DYNAMIQUE SELON LE RÔLE
         if (role === 'admin') {
             router.push('/admin/dashboard');
         } else if (role === 'comptable') {
             router.push('/compta/dashboard');
-        } else {
-            // Sécurité : si aucun rôle ne correspond ou n'est renvoyé
+        } else if (role === 'gestionnaire') {
+            router.push('/gestionnaire/dashboard');
+        }else {
             router.push('/compta/dashboard'); 
         }
 

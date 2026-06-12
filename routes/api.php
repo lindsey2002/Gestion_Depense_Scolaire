@@ -12,17 +12,22 @@ use App\Http\Controllers\Api\V1\DashboardController;
 
 
 Route::prefix('v1')->group(function(){
-    Route::post('/register', [AuthController::class, 'register']);
+    
     Route::post('/login', [AuthController::class, 'login']);
 
     Route::middleware('auth:sanctum')->group(function(){
-       
+
+        Route::get('/classes', [ClasseController::class, 'index']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+
         Route::middleware('role:admin')->group(function(){
             Route::get('/admin-dashboard', function(){
                 return response()->json(['message' => 'Bienvenue dans l\'espace Admin !']);
             });
 
             // seul l'admin peut configurer ou supprimer les classe de l'ecole
+            Route::post('/register', [AuthController::class, 'register']);
+            
             Route::post('/classes', [ClasseController::class, 'store']);
             Route::put('/classes/{id}', [ClasseController::class, 'update']);
             Route::delete('/classes/{id}', [ClasseController::class, 'destroy']);
@@ -45,12 +50,7 @@ Route::prefix('v1')->group(function(){
                 return response()->json(['message' => 'Voici les données financières.']);
             });
 
-            Route::post('/logout', [AuthController::class, 'logout']);
-
-            Route::get('/classes', [ClasseController::class, 'index']);
-
             Route::get('/eleves', [EleveController::class, 'index']);
-            Route::post('/eleves', [EleveController::class, 'store']);
             Route::get('/eleves/{id}', [EleveController::class, 'show']);
             Route::put('/eleves/{id}', [EleveController::class, 'update']);
             Route::delete('/eleves/{id}', [EleveController::class, 'destroy']);
@@ -66,6 +66,10 @@ Route::prefix('v1')->group(function(){
 
             Route::get('dashboard/stats', [DashboardController::class, 'index']);
         });
-        
+        // 4. ESPACE  GESTIONNAIRE
+       Route::middleware('role:gestionnaire')->group(function () {
+            Route::post('/eleves', [EleveController::class, 'store']);
+           
+       });
     });
 });

@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import DashboardCompta from '../views/compta/DashboardCompta.vue';
 import Login from '../views/auth/Login.vue';
-import Register from '../views/auth/Register.vue';
 import GestionClasses from '../views/admin/GestionClasses.vue';
-import InscriptionEleve from "../views/eleves/InscriptionEleve.vue";
+import InscriptionEleve from '../views/eleves/InscriptionEleve.vue';
 import GestionVagues from '../views/admin/GestionVagues.vue';
-import GestionPaiements from "../views/compta/GestionPaiements.vue";
+import AdminRegister from '../views/admin/Register.vue';
+import GestionPaiements from '../views/compta/GestionPaiements.vue';
+import DashboardGestionnaire from '../views/eleves/DashboardGestionnaire.vue';
 
 
 // on definit les routes cad les correspondances entre url et pages
@@ -17,9 +18,10 @@ const routes = [
         component: Login
     },
     {
-        path: '/register',
-        name: 'register',
-        component: Register
+        path: '/admin/register',
+        name: 'AdminRegister',
+        component: () => import('@/views/admin/Register.vue'),
+        meta: {requiresAuth: true, role: 'admin'}
     },
 
     // ═══ ESPACE ADMINISTRATEUR (Protégé) ═══
@@ -62,30 +64,38 @@ const routes = [
         meta: { requiresAuth: true, role: 'comptable' }
     },
     {
-        path: '/compta/inscription-eleve',
-        name: 'InscriptionEleve',
+        path: '/gestionnaire/inscription-eleve',
+        name: 'InscriptionEleveGestionnaire',
         component: InscriptionEleve,
-        meta: { requiresAuth: true, role: 'comptable' }
+        meta: { requiresAuth: true, role: 'gestionnaire' }
     },
     {
-        path: '/compta/rechercheeleve', // Aligné sur le "to" de ta carte Encaisser
+        path: '/compta/rechercheeleve', 
         name: 'compta.rechercheeleve',
         component: () => import('../views/compta/RechercheEleve.vue'),
         meta: { requiresAuth: true, role: 'comptable' }
     },
     {
-        path: '/compta/paiement/:id', // L'entonnoir après la recherche d'élève
+        path: '/compta/paiement/:id',
         name: 'compta.paiement',
         component: () => import('@/views/compta/GestionPaiements.vue'),
         props: true,
         meta: { requiresAuth: true, role: 'comptable' }
     },
     {
-        path: '/compta/gestiondepense', // Aligné sur le "to" de ta carte Dépenses
+        path: '/compta/gestiondepense',
         name: 'compta.gestiondepense',
         component: () => import('@/views/compta/GestionDepenses.vue'),
         meta: { requiresAuth: true, role: 'comptable' }
-    }
+    },
+
+    // ═══ ESPACE GESTIONNAIRE (Protégé) ═══
+    {
+        path: '/gestionnaire/dashboard',
+        name: 'DashboardGestionnaire',
+        component: () => import('@/views/eleves/DashboardGestionnaire.vue'),
+        meta: { requiresAuth: true, role: 'gestionnaire' }
+    },
 ];
 
 const router = createRouter({
