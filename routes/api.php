@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DepenseController;
 use App\Http\Controllers\Api\V1\VagueController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Models\Annonce;
 
 
 Route::prefix('v1')->group(function(){
@@ -19,6 +20,7 @@ Route::prefix('v1')->group(function(){
 
         Route::get('/classes', [ClasseController::class, 'index']);
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/annonces', function() { return response()->json(Annonce::latest()->get()); });
 
         Route::middleware('role:admin')->group(function(){
             Route::get('/admin-dashboard', function(){
@@ -67,9 +69,42 @@ Route::prefix('v1')->group(function(){
             Route::get('dashboard/stats', [DashboardController::class, 'index']);
         });
         // 4. ESPACE  GESTIONNAIRE
-       Route::middleware('role:gestionnaire')->group(function () {
+        Route::middleware('role:gestionnaire')->group(function () {
             Route::post('/eleves', [EleveController::class, 'store']);
-           
-       });
+            Route::get('/dashboard/stats', [DashboardController::class, 'index']);
+            Route::get('/annonces', function() {
+                return response()->json(\App\Models\Annonce::latest()->get());
+            });
+    
+            Route::post('/annonces', function(\Illuminate\Http\Request $request) {
+                // Validation manuelle rapide pour éviter le crash automatique 500
+                if (!$request->has('titre') || !$request->has('contenu')) {
+                    return response()->json(['error' => 'Champs obligatoires manquants'], 400);
+                }
+
+                $path = null;
+                
+                // Déplacement physique du fichier directement dans le dossier public
+                if ($request->hasFile('fichier')) {
+                    $file = $request->file('fichier');
+                    $name = time() . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('uploads'), $name);
+                    $path = 'uploads/' . $name;
+                }
+
+                // Création de l'annonce avec le chemin complet du modèle
+                $annonce = \App\Models\Annonce::create([
+                    'titre' => $request->input('titre'),
+                    'contenu' => $request->input('contenu'),
+                    'fichier' => $path
+                ]);
+
+                return response()->json($annonce, 201);
+            });
+        });
+
+
+
     });
+
 });

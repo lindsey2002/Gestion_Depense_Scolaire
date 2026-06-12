@@ -64,8 +64,8 @@ class AuthController extends Controller
         $prenomNettoye = Str::slug(strtolower($request->prenom), '');
         $nomNettoye = Str::slug(strtolower($request->nom), '');
 
-        $premiereLettre = substr($prenomClean, 0, 3);
-        $baseEmail = $premiereLettre . $nomClean;
+        $premiereLettre = substr($prenomNettoye, 0, 3);
+        $baseEmail = $premiereLettre . $nomNettoye;
         $emailPro = $baseEmail.'@isi.com';
         $passwordTemporaire = Str::random(6);
         
