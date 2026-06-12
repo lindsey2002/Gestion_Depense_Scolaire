@@ -75,8 +75,7 @@ const handleRegister = async () => {
         loading.value = true;
         error.value = null;
         successMessage.value = null;
-        
-        // Récupération du token d'authentification de l'Admin connecté
+
         const token = localStorage.getItem('auth_token');
         
         if (!token) {
@@ -84,7 +83,6 @@ const handleRegister = async () => {
             return;
         }
 
-        // Envoi des données à ta route sécurisée par le middleware admin
         const response = await axios.post('/api/v1/register', form.value, {
             headers: {
                 'Authorization': `Bearer ${token}`,

@@ -72,6 +72,8 @@ const handleLogin = async () => {
             router.push('/compta/dashboard');
         } else if (role === 'gestionnaire') {
             router.push('/gestionnaire/dashboard');
+        }else if (role === 'parent') {
+            router.push('/parent/dashboard');
         }else {
             router.push('/login'); 
         }

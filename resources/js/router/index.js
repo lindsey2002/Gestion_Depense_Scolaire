@@ -7,6 +7,7 @@ import GestionVagues from '../views/admin/GestionVagues.vue';
 import AdminRegister from '../views/admin/Register.vue';
 import GestionPaiements from '../views/compta/GestionPaiements.vue';
 import DashboardGestionnaire from '../views/eleves/DashboardGestionnaire.vue';
+import DashboardParent from '../views/parent/DashboardParent.vue';
 
 
 // on definit les routes cad les correspondances entre url et pages
@@ -95,6 +96,15 @@ const routes = [
         name: 'DashboardGestionnaire',
         component: () => import('@/views/eleves/DashboardGestionnaire.vue'),
         meta: { requiresAuth: true, role: 'gestionnaire' }
+    },
+    {
+        path: '/parent/dashboard',
+        name: 'ParentDashboard',
+        component: DashboardParent,
+        meta: { 
+            requiresAuth: true, 
+            role: 'parent'
+        }
     },
 ];
 

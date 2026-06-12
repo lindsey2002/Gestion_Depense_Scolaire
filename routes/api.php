@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DepenseController;
 use App\Http\Controllers\Api\V1\VagueController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\ParentController;
 use App\Models\Annonce;
 
 
@@ -103,8 +104,12 @@ Route::prefix('v1')->group(function(){
             });
         });
 
+        // 5. ESPACE PARENT
+        Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/parent/dashboard', [ParentController::class, 'getDashboardData']);
+});
 
-
+// fin api à ne  pas toucher
     });
 
 });

@@ -24,71 +24,86 @@ class EleveController extends Controller
      * Inscrire un nouvel eleve et lier/creer son parent.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'nom' => [
-                'required', 'string', 'max:255',
-                Rule::unique('eleves')->where(function ($query) use ($request){
-                    return  $query->where('prenom', $request->prenom)
-                                  ->where('date_naissance', $request->date_naissance);
-                })
-            ],
-            'prenom' => 'required|string|max:255',
-            'date_naissance' => 'required|date',
-            'classe_id' => 'required|exists:classes,id',
-            // Validations du parent tuteur
-            'parent_email' => 'required|email',
-            'parent_prenom' => 'required|string|max:255',
-            'parent_nom' => 'required|string|max:255',
-        ], [
-            'nom.unique' => "Un eleve avec ce nom, prenom et date naissance est deja inscrit. Si vous devez corriger une information, utilisez la modification.",
+{
+    // 1. VALIDATION COMPLÈTE (ÉLÈVE + PARENT)
+    $request->validate([
+        'nom' => [
+            'required', 'string', 'max:255',
+            \Illuminate\Validation\Rule::unique('eleves')->where(function ($query) use ($request){
+                return  $query->where('prenom', $request->prenom)
+                              ->where('date_naissance', $request->date_naissance);
+            })
+        ],
+        'prenom' => 'required|string|max:255',
+        'date_naissance' => 'required|date',
+        'classe_id' => 'required|exists:classes,id',
+        
+        // Validation du parent : unique dans 'users' sauf si c'est déjà un compte 'parent'
+        'parent_email' => [
+            'required', 'email',
+            \Illuminate\Validation\Rule::unique('users', 'email')->where(function ($query) {
+                return $query->where('role', '!=', 'parent');
+            })
+        ],
+        'parent_prenom' => 'required|string|max:255',
+        'parent_nom' => 'required|string|max:255',
+    ], [
+        'nom.unique' => "Un eleve avec ce nom, prenom et date naissance est deja inscrit. Si vous devez corriger une information, utilisez la modification.",
+        'parent_email.unique' => "Cet email est déjà utilisé par un membre du personnel.",
+    ]);
+
+    // 2. GESTION DU COMPTE PARENT & ENVOI DU MAIL DE BIENVENUE
+    $parentUser = \App\Models\User::where('email', $request->parent_email)
+                                  ->where('role', 'parent')
+                                  ->first();
+
+    // Si le parent n'existe pas du tout, on lui crée son compte d'accès et on l'avertit
+    if (!$parentUser) {
+        // Génération d'un mot de passe initial de 6 caractères (cohérent avec AuthController)
+        $passwordTemporaire = \Illuminate\Support\Str::random(6);
+
+        $parentUser = \App\Models\User::create([
+            'name' => $request->parent_prenom . ' ' . $request->parent_nom,
+            'email' => $request->parent_email,
+            'password' => \Illuminate\Support\Facades\Hash::make($passwordTemporaire),
+            'role' => 'parent',
         ]);
 
-        // 1. GESTION DU COMPTE PARENT (COMPARAISON)
-        $parentUser = \App\Models\User::where('email', $request->parent_email)
-                                      ->where('role', 'parent')
-                                      ->first();
-
-        // Si le parent n'existe pas du tout, on lui crée son compte d'accès
-        if (!$parentUser) {
-            // Génération d'un mot de passe initial
-            $motDePasseBrut = 'ISI-' . date('Y') . '-' . rand(1000, 9999);
-
-            $parentUser = \App\Models\User::create([
-                'name' => $request->parent_prenom . ' ' . $request->parent_nom,
-                'email' => $request->parent_email,
-                'password' => bcrypt($motDePasseBrut),
-                'role' => 'parent',
-            ]);
+        // Déclenchement de l'envoi du mail avec les identifiants
+        try {
+            \Illuminate\Support\Facades\Mail::to($parentUser->email)
+                ->send(new \App\Mail\AgentCreatedMail($parentUser, $passwordTemporaire));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Échec de l'envoi du mail au parent : " . $e->getMessage());
         }
-
-        // 2. LOGIQUE DE GÉNÉRATION DU MATRICULE AUTOMATIQUE
-        $classe = Classe::findOrFail($request->classe_id);
-        $chiffreNiveau = preg_replace('/[^0-9]/', '', $classe->niveau);
-        $lettreNiveau = ucfirst(strtolower(substr($classe->niveau, 0, 3)));
-        $prefixeNiveau = $lettreNiveau . $chiffreNiveau;
-
-        $diminutifFiliere = strtolower($classe->diminutif);
-        $cursus = strtolower($classe->cursus);
-
-        $anneeCourante = date('y');
-        $chiffresUnique = rand(1000, 9999);
-
-        $matriculeGenere = $prefixeNiveau . $diminutifFiliere . $cursus . '-' . $anneeCourante . '-' . $chiffresUnique;
-
-        // 3. INSERER LES DONNÉES EN BD
-        $donnees = $request->all();
-        $donnees['matricule'] = $matriculeGenere;
-        $donnees['parent_id'] = $parentUser->id; // Stockage de la liaison de l'ID parent
-
-        // Correction effectuée : on passe le tableau contenant le matricule et parent_id
-        $eleve = Eleve::create($donnees);
-
-        return response()->json([
-            'message' => 'Elève inscrit avec succès !',
-            'eleve' => $eleve->load('classe')
-        ], 201);
     }
+
+    // 3. LOGIQUE DE GÉNÉRATION DU MATRICULE AUTOMATIQUE
+    $classe = Classe::findOrFail($request->classe_id);
+    $chiffreNiveau = preg_replace('/[^0-9]/', '', $classe->niveau);
+    $lettreNiveau = ucfirst(strtolower(substr($classe->niveau, 0, 3)));
+    $prefixeNiveau = $lettreNiveau . $chiffreNiveau;
+
+    $diminutifFiliere = strtolower($classe->diminutif);
+    $cursus = strtolower($classe->cursus);
+
+    $anneeCourante = date('y');
+    $chiffresUnique = rand(1000, 9999);
+
+    $matriculeGenere = $prefixeNiveau . $diminutifFiliere . $cursus . '-' . $anneeCourante . '-' . $chiffresUnique;
+
+    // 4. INSERER LES DONNÉES EN BD AVEC LES LIAISONS
+    $donnees = $request->all();
+    $donnees['matricule'] = $matriculeGenere;
+    $donnees['parent_id'] = $parentUser->id; // Stockage de la liaison de l'ID parent
+
+    $eleve = Eleve::create($donnees);
+
+    return response()->json([
+        'message' => 'Elève inscrit avec succès !',
+        'eleve' => $eleve->load('classe')
+    ], 201);
+}
 
     public function update(Request $request, $id)
     {
