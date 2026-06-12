@@ -71,22 +71,20 @@
       </p>
     </div>
 
-    <div v-if="eleve.echeancier || eleve.classe?.echeancier" class="border-t border-gray-200 pt-4 mb-6">
-      <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Situation de l'échéancier annuel</h4>
-      
-      <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-10 gap-1.5 text-center">
-        <div v-for="echeance in (eleve.echeancier || eleve.classe.echeancier)" :key="echeance.mois" 
-             class="p-2 rounded-lg border text-center transition-all"
-             :class="Number(echeance.solde) === 0 
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
-                : 'bg-white border-slate-200 text-slate-700'">
-          <span class="text-[10px] font-bold uppercase tracking-tight block">{{ echeance.mois }}</span>
-          <span class="text-xs font-mono font-bold mt-0.5 block">
-            {{ Number(echeance.solde) === 0 ? '0 F' : `${formatDialogueCurrency(echeance.solde)}` }}
-          </span>
-        </div>
-      </div>
+    <div class="border-t border-gray-200 pt-4 mb-6">
+  <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">État de la scolarité (Suivi Mensuel)</h4>
+  
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+    <div v-for="mois in moisDeLaVagueRecu" :key="mois" 
+         class="flex justify-between items-center px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+      <span class="font-medium text-gray-700 uppercase tracking-tight">{{ mois }} :</span>
+      <span class="font-mono font-bold" 
+            :class="getStatutMoisRecu(mois) === 'paye' ? 'text-gray-400' : 'text-gray-900'">
+        {{ getStatutMoisRecu(mois) === 'paye' ? 'Payé' : formatDialogueCurrency(eleve.classe?.tarif_mensuel || 0) }}
+      </span>
     </div>
+  </div>
+</div>
 
     <div class="grid grid-cols-2 gap-4 text-[10px] text-gray-400 pt-4 border-t border-dashed border-gray-200">
       <div class="text-left">
@@ -103,7 +101,7 @@
 
     <div class="mt-6 text-center print:hidden">
       <button  
-        @click="imprimerLeRecu"
+        @click="ImprimerLeRecu"
         class="w-full bg-slate-900 text-white py-2.5 px-4 rounded-xl text-sm font-semibold hover:bg-slate-800 transition shadow-sm flex items-center justify-center space-x-2 transform hover:-translate-y-0.5 duration-150"
       >
         <span>🖨️ Imprimer le reçu officiel</span>
@@ -114,10 +112,47 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   paiement: { type: Object, required: true },
   eleve: { type: Object, required: true }
 });
+
+const ordreMoisAnnee = [
+  'septembre', 'octobre', 'novembre', 'décembre', 
+  'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août'
+];
+
+const moisDeLaVagueRecu = computed(() => {
+  if (!props.eleve || !props.eleve.classe?.vague) return [];
+  const vague = props.eleve.classe.vague;
+  const moisDebutNom = vague.nom.toLowerCase().trim(); 
+  const nomMoisTrouve = ordreMoisAnnee.find(m => moisDebutNom.includes(m)) || 'octobre';
+  const indexDebut = ordreMoisAnnee.indexOf(nomMoisTrouve);
+  const listeMoisGeneres = [];
+  const totalMois = vague.nombre_mois || 9; 
+  for (let i = 0; i < totalMois; i++) {
+    listeMoisGeneres.push(ordreMoisAnnee[(indexDebut + i) % 12]);
+  }
+  return listeMoisGeneres;
+});
+
+const getStatutMoisRecu = (nomMois) => {
+  if (!props.eleve) return 'reste';
+
+  const dejaPayeEnBase = props.eleve.paiements?.some(
+    p => p.type_paiement === 'mensualite' && p.mois?.toLowerCase() === nomMois?.toLowerCase()
+  );
+
+  const payeAlInstant = props.paiement && 
+    props.paiement.type_paiement === 'mensualite' && 
+    (Array.isArray(props.paiement.liste_mois_payes) 
+      ? props.paiement.liste_mois_payes.some(m => m?.toLowerCase() === nomMois?.toLowerCase())
+      : props.paiement.mois?.toLowerCase() === nomMois?.toLowerCase());
+
+  return (dejaPayeEnBase || payeAlInstant) ? 'paye' : 'reste';
+};
 
 const formatDialogueCurrency = (valeur) => {
   if (!valeur && valeur !== 0) return '0 F';

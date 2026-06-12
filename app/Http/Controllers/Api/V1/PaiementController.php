@@ -77,11 +77,12 @@ class PaiementController extends Controller
                     'numero_recu' => $numeroRecuGenere 
                 ]);
             }
+            if ($paiementFinal) {
+                $paiementFinal->liste_mois_payes = $request->mois;
+                $paiementFinal->montant_total_recu = $request->montant;
+            }
         }
-            $paiementFinal->liste_mois_payes = $request->mois;
-            $paiementFinal->montant_total_recu = $request->montant;
         
-
         if($request->type_paiement === 'inscription')
         {
             $donnees['mois'] = null; 

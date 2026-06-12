@@ -7,6 +7,7 @@ use App\Models\Eleve;
 use App\Models\Classe;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class EleveController extends Controller
 {
@@ -20,7 +21,7 @@ class EleveController extends Controller
     }
 
     /**
-     * Inscrire un nouvel eleve.
+     * Inscrire un nouvel eleve et lier/creer son parent.
      */
     public function store(Request $request)
     {
@@ -35,40 +36,53 @@ class EleveController extends Controller
             'prenom' => 'required|string|max:255',
             'date_naissance' => 'required|date',
             'classe_id' => 'required|exists:classes,id',
+            // Validations du parent tuteur
+            'parent_email' => 'required|email',
+            'parent_prenom' => 'required|string|max:255',
+            'parent_nom' => 'required|string|max:255',
         ], [
             'nom.unique' => "Un eleve avec ce nom, prenom et date naissance est deja inscrit. Si vous devez corriger une information, utilisez la modification.",
-        ]
-        );
+        ]);
 
-        // on recupere la classe
+        // 1. GESTION DU COMPTE PARENT (COMPARAISON)
+        $parentUser = \App\Models\User::where('email', $request->parent_email)
+                                      ->where('role', 'parent')
+                                      ->first();
+
+        // Si le parent n'existe pas du tout, on lui crée son compte d'accès
+        if (!$parentUser) {
+            // Génération d'un mot de passe initial
+            $motDePasseBrut = 'ISI-' . date('Y') . '-' . rand(1000, 9999);
+
+            $parentUser = \App\Models\User::create([
+                'name' => $request->parent_prenom . ' ' . $request->parent_nom,
+                'email' => $request->parent_email,
+                'password' => bcrypt($motDePasseBrut),
+                'role' => 'parent',
+            ]);
+        }
+
+        // 2. LOGIQUE DE GÉNÉRATION DU MATRICULE AUTOMATIQUE
         $classe = Classe::findOrFail($request->classe_id);
-        
-        // extraction du niveau: ex "licence 2" -> on prend "lic" + le chiffre "2" = "lic3"
-        // on extrait le premier chiffre du niveau
         $chiffreNiveau = preg_replace('/[^0-9]/', '', $classe->niveau);
-
-        // on prend les 3premieres lettres du niveau en minuscules ou majuscules
         $lettreNiveau = ucfirst(strtolower(substr($classe->niveau, 0, 3)));
         $prefixeNiveau = $lettreNiveau . $chiffreNiveau;
 
-        // recuperation directe des configurations de la classe
         $diminutifFiliere = strtolower($classe->diminutif);
         $cursus = strtolower($classe->cursus);
 
-        // les deux premieres lettres du prenom..
-
-        // compteur de chiffres aleatoires pour l'unicite
         $anneeCourante = date('y');
         $chiffresUnique = rand(1000, 9999);
 
-        // assemblage final
         $matriculeGenere = $prefixeNiveau . $diminutifFiliere . $cursus . '-' . $anneeCourante . '-' . $chiffresUnique;
 
-        // enregistrement
+        // 3. INSERER LES DONNÉES EN BD
         $donnees = $request->all();
         $donnees['matricule'] = $matriculeGenere;
+        $donnees['parent_id'] = $parentUser->id; // Stockage de la liaison de l'ID parent
 
-        $eleve = Eleve::create($request->all());
+        // Correction effectuée : on passe le tableau contenant le matricule et parent_id
+        $eleve = Eleve::create($donnees);
 
         return response()->json([
             'message' => 'Elève inscrit avec succès !',
@@ -107,40 +121,29 @@ class EleveController extends Controller
         ], 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function historique($id)
     {
         $eleve = Eleve::with(['classe.vague', 'paiements'])->find($id);
 
         if(! $eleve){
-            return response()->json([
-                'message' => "Eleve introuvable"
-            ], 404);
+            return response()->json(['message' => "Eleve introuvable"], 404);
         }
 
         $vague = $eleve->classe->vague;
         if(! $vague){
-            return response()->json([
-                'message' => "Impossible de generer l'echeancier: cette classe n'est rattachée a aucune vague de rentree."
-            ], 422);
+            return response()->json(['message' => "Impossible de generer l'echeancier: cette classe n'est rattachée a aucune vague de rentree."], 422);
         }
 
         $dateDebut = \Carbon\Carbon::parse($vague->date_debut);
         $nombreMois = $vague->nombre_mois;
 
         \Carbon\Carbon::setLocale('fr');        
-
         $moisAnneeScolaire = [];
 
         for($i = 0; $i < $nombreMois; $i++){
             $moisAnneeScolaire[] = $dateDebut->copy()->addMonths($i)->translatedFormat('F');
         }
 
-        /* ici on extrait la colonne 'mois' de la collection de ses
-         paiements, pluck('mois') va donner un tableau du genre: ['octobre',
-         'novembre', ..] */
         $moisPayes = $eleve->paiements
             ->where('type_paiement', 'mensualite')
             ->whereNotNull('mois')
@@ -168,7 +171,7 @@ class EleveController extends Controller
                 'matricule' => $eleve->matricule,
                 'prenom' => $eleve->prenom,
                 'nom' => $eleve->nom,
-                'classe' => $eleve->classe->nom . '' . $eleve->classe->niveau,
+                'classe' => $eleve->classe->nom . ' ' . $eleve->classe->niveau,
                 'statut_actuel' => $eleve->statut,
                 'vague_rentree' => $vague->nom
             ],
@@ -184,22 +187,20 @@ class EleveController extends Controller
     }
 
     public function show(Request $request, $id)
-{
-    $query = Eleve::query();
+    {
+        $query = Eleve::query();
 
-    // Gestion dynamique des relations demandées par Vue (?include=paiements,classe.vague)
-    if ($request->has('include')) {
-        $relations = explode(',', $request->input('include'));
-        $query->with($relations);
+        if ($request->has('include')) {
+            $relations = explode(',', $request->input('include'));
+            $query->with($relations);
+        }
+
+        $eleve = $query->find($id);
+
+        if (!$eleve) {
+            return response()->json(['message' => 'Élève introuvable'], 404);
+        }
+
+        return response()->json($eleve);
     }
-
-    $eleve = $query->find($id);
-
-    if (!$eleve) {
-        return response()->json(['message' => 'Élève introuvable'], 404);
-    }
-
-    return response()->json($eleve);
-}
-
 }

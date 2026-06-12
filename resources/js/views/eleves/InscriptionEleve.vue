@@ -10,31 +10,57 @@
       <div v-if="error" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-semibold">{{ error }}</div>
       <div v-if="success" class="bg-green-50 text-green-600 p-3 rounded-lg text-sm font-semibold">{{ success }}</div>
 
-      <form @submit.prevent="handleRegisterStudent" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Nom</label>
-            <input v-model="form.nom" type="text" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+      <form @submit.prevent="handleRegisterStudent" class="space-y-6">
+        
+        <div class="space-y-4">
+          <h2 class="text-sm font-bold text-orange-600 uppercase tracking-wider border-b pb-1">Informations de l'élève</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Nom</label>
+              <input v-model="form.nom" type="text" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Prénom</label>
+              <input v-model="form.prenom" type="text" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+            </div>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700">Prénom</label>
-            <input v-model="form.prenom" type="text" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+            <label class="block text-sm font-medium text-gray-700">Date de naissance</label>
+            <input v-model="form.date_naissance" type="date" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Classe d'affectation</label>
+            <select v-model="form.classe_id" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-orange-500 focus:border-orange-500">
+              <option value="" disabled>Sélectionnez une classe</option>
+              <option v-for="classe in classes" :key="classe.id" :value="classe.id">
+                {{ classe.nom }} ({{ classe.niveau }})
+              </option>
+            </select>
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Date de naissance</label>
-          <input v-model="form.date_naissance" type="date" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
-        </div>
+        <div class="space-y-4 pt-2">
+          <h2 class="text-sm font-bold text-orange-600 uppercase tracking-wider border-b pb-1">Informations du Tuteur / Parent</h2>
+          <p class="text-[11px] text-gray-400 -mt-2 italic">Si l'email existe déjà, le système rattachera automatiquement l'enfant à ce parent.</p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Prénom du tuteur</label>
+              <input v-model="form.parent_prenom" type="text" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Nom du tuteur</label>
+              <input v-model="form.parent_nom" type="text" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+            </div>
+          </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Classe d'affectation</label>
-          <select v-model="form.classe_id" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-orange-500 focus:border-orange-500">
-            <option value="" disabled>Sélectionnez une classe</option>
-            <option v-for="classe in classes" :key="classe.id" :value="classe.id">
-              {{ classe.nom }} ({{ classe.niveau }})
-            </option>
-          </select>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Adresse Email du tuteur</label>
+            <input v-model="form.parent_email" type="email" required class="mt-1 block w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+          </div>
         </div>
 
         <div class="pt-4">
@@ -61,10 +87,13 @@ const form = ref({
     nom: '',
     prenom: '',
     date_naissance: '', 
-    classe_id: ''
+    classe_id: '',
+    // Nouveaux champs transmis
+    parent_prenom: '',
+    parent_nom: '',
+    parent_email: ''
 });
 
-// Récupération des classes
 const fetchClasses = async () => {
     try {
         const token = localStorage.getItem('auth_token');
@@ -78,7 +107,6 @@ const fetchClasses = async () => {
     }
 };
 
-// Soumission vers EleveController::store
 const handleRegisterStudent = async () => {
     try {
         loading.value = true;
@@ -90,10 +118,18 @@ const handleRegisterStudent = async () => {
             headers: { Authorization: `Bearer ${token}` }
         });
 
-        success.value = `Fiche créée avec succès ! Matricule généré : ${response.data.eleve.matricule}. En attente du règlement des frais.`;
+        success.value = `Fiche créée avec succès ! Matricule généré : ${response.data.eleve.matricule}. Un compte d'accès parent a été configuré/associé.`;
         
-        // Réinitialisation du formulaire
-        form.value = { nom: '', prenom: '', date_naissance: '', classe_id: '' };
+        // Réinitialisation complète du formulaire
+        form.value = { 
+            nom: '', 
+            prenom: '', 
+            date_naissance: '', 
+            classe_id: '',
+            parent_prenom: '',
+            parent_nom: '',
+            parent_email: ''
+        };
     } catch (err) {
         console.error(err);
         error.value = err.response?.data?.message || "Erreur lors de l'enregistrement de l'élève.";
@@ -106,3 +142,4 @@ onMounted(() => {
     fetchClasses();
 });
 </script>
+

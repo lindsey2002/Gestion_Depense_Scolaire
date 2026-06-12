@@ -29,7 +29,7 @@
             <p class="text-sm font-medium text-white">{{ userProfile.name }}</p>
             <p class="text-xs text-gray-400">{{ userProfile.email }}</p>
           </div>
-          <button @click="handleLogout" class="text-gray-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-gray-700 transition" title="Déconnexion">
+          <button @click="gererDeconnexion" class="text-gray-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-gray-700 transition" title="Déconnexion">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
@@ -185,8 +185,6 @@ const handleFileUpload = (event) => {
     fichierSelectionne.value = event.target.files[0];
 };
 
-// Publier l'annonce avec FormData
-// Publier l'annonce avec FormData
 const publierAnnonce = async () => {
     if (!nouveauTitre.value || !nouveauContenu.value) return;
 
@@ -225,4 +223,27 @@ const publierAnnonce = async () => {
         }
     }
 };
+
+const gererDeconnexion = async () => {
+  try {
+    const token = localStorage.getItem('auth_token')
+    
+    // 1. On avertit le serveur pour invalider le token
+    await fetch('/api/v1/logout', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+  } catch (error) {
+    console.error("Erreur lors de la déconnexion serveur :", error)
+  } finally {
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_role')
+    
+    // 3. Redirection immédiate vers la page de connexion
+    router.push('/login') 
+  }
+}
 </script>

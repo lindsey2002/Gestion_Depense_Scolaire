@@ -20,6 +20,7 @@ Route::prefix('v1')->group(function(){
 
         Route::get('/classes', [ClasseController::class, 'index']);
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('dashboard/stats', [DashboardController::class, 'index']);
         Route::get('/annonces', function() { return response()->json(Annonce::latest()->get()); });
 
         Route::middleware('role:admin')->group(function(){
@@ -66,12 +67,11 @@ Route::prefix('v1')->group(function(){
 
             Route::get('/compta/exporter-excel', [PaiementController::class, 'exportExcel']);
 
-            Route::get('dashboard/stats', [DashboardController::class, 'index']);
+            
         });
         // 4. ESPACE  GESTIONNAIRE
         Route::middleware('role:gestionnaire')->group(function () {
             Route::post('/eleves', [EleveController::class, 'store']);
-            Route::get('/dashboard/stats', [DashboardController::class, 'index']);
             Route::get('/annonces', function() {
                 return response()->json(\App\Models\Annonce::latest()->get());
             });
