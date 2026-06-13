@@ -17,7 +17,7 @@ L'application répond aux besoins de 3 acteurs clés :
 
 ##  Les Points Forts de l'Application
 
-* **Gestion Flexible par "Vagues" :** Contrairement aux systèmes rigides, la grille de suivi des mensualités s'adapte automatiquement à la vague d'intégration de l'étudiant (ex: Vague Octobre, Vague Janvier) et génère dynamiquement le nombre de mois dus. *(Inspiré du modèle de référence de l'UNCHK).*
+* **Gestion Flexible par "Vagues" :** Contrairement aux systèmes rigides, la grille de suivi des mensualités s'adapte automatiquement à la vague d'intégration de l'étudiant (ex: Vague Octobre, Vague Janvier) et génère dynamiquement le nombre de mois dus.
 * **Sécurité Métier Stricte (Rôles Hermétiques) :** L'administration supervise, mais **seul le comptable** possède les droits d'écriture sur la caisse (`POST /paiements`). Les doublons de paiement pour un même mois sont bloqués mathématiquement en base de données.
 * **Synchronisation Vue <-> API en Temps Réel :** Dès qu'un paiement est validé à la caisse, le tableau de bord du parent recalcule instantanément le reste à payer global et met à jour les badges de suivi (passage du rouge au vert).
 * **Architecture Évolutive :** Une base de données optimisée et centralisée, idéale pour de futures extensions en **Data Science** (ex: analyse prédictive des risques d'impayés).

@@ -119,7 +119,7 @@ router.beforeEach((to, from, next) => {
   const estConnecte = localStorage.getItem('auth_token')
 
   if (pageProtegee && !estConnecte) {
-    return '/login'
+    return '/'
   } else {
     next()
   }

@@ -28,7 +28,8 @@ class ClasseController extends Controller
             'nom' => [
                 'required', 'string',
                 Rule::unique('classes')->where(function ($query) use ($request){
-                    return $query->where('niveau', $request->niveau);
+                    return $query->where('niveau', $request->niveau)
+                                 ->where('vague_id', $request->vague_id);
                 })
             ],
             'niveau' => 'required|string',

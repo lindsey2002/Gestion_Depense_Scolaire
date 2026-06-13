@@ -51,9 +51,12 @@ Route::prefix('v1')->group(function(){
         // zone commune: admin et comptable
         Route::middleware('role:admin,comptable')->group(function (){
             Route::get('/compta-data', function(){
-                return response()->json(['message' => 'Voici les données financières.']);
-            });
+                $total = \App\Models\Paiement::sum('montant');
+                return response()->json(['message' => 'Voici les données financières.',
+            'total_recettes' => $total 
+            ], 200);
 
+            });
             Route::get('/eleves', [EleveController::class, 'index']);
             Route::get('/eleves/{id}', [EleveController::class, 'show']);
             Route::put('/eleves/{id}', [EleveController::class, 'update']);
@@ -74,6 +77,7 @@ Route::prefix('v1')->group(function(){
         });
         // 4. ESPACE  GESTIONNAIRE
         Route::middleware('role:gestionnaire')->group(function () {
+            Route::get('/eleves', [EleveController::class, 'index']);
             Route::post('/eleves', [EleveController::class, 'store']);
             Route::get('/annonces', function() {
                 return response()->json(\App\Models\Annonce::latest()->get());

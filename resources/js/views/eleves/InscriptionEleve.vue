@@ -3,7 +3,7 @@
     <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100 space-y-6">
       <div class="mb-4">
       <button 
-        @click="$router.push({ name: 'ComptaDashboard' })" 
+        @click="$router.push({ name: 'DashboardGestionnaire' })" 
         class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors group"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

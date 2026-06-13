@@ -35,32 +35,30 @@ export function useGestionDepense() {
   });
 
   // ═══ FONCTIONS API (BACKEND) ═══
-
-  // 🎯 REVOILÀ LA FONCTION DISPARUE : Déclarée proprement avec "async function"
   async function chargerDonnees() {
-    loading.value = true;
-    error.value = null;
     try {
-      const token = localStorage.getItem('auth_token');
-      
-      // 1. Récupération des dépenses
-      const resDepenses = await axios.get('/api/v1/depenses', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      depenses.value = resDepenses.data;
+  loading.value = true;
+  error.value = null;
+  const token = localStorage.getItem('auth_token');
+  const configurationHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
-      // 2. Simulation ou récupération du fond de caisse (Modifie 500000 quand ton API Recettes sera prête)
-      totalRecettes.value = 50000; 
+  const resDepenses = await axios.get('/api/v1/depenses', configurationHeaders);
+  depenses.value = resDepenses.data;
 
-    } catch (err) {
-      console.error(err);
-      error.value = "Impossible de charger les données des dépenses.";
-    } finally {
-      loading.value = false;
-    }
+  const resRecettes = await axios.get('/api/v1/compta-data', configurationHeaders);
+  
+  if (resRecettes.data && resRecettes.data.total_recettes !== undefined) {
+    totalRecettes.value = resRecettes.data.total_recettes;
   }
 
-  // Enregistrer ou Modifier
+} catch (err) {
+  console.error(err);
+  error.value = "Impossible de charger les données financières de la comptabilité.";
+} finally {
+  loading.value = false;
+}
+  }
+
   async function soumettreFormulaire() {
     loadingBtn.value = true;
     error.value = null;

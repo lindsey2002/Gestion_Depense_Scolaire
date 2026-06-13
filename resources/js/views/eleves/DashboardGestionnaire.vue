@@ -116,7 +116,7 @@
 
 </div>
 
-<div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg w-full">
+<div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg w-full mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-700 pb-4 mb-4">
           <div>
             <h3 class="text-lg font-semibold text-white"> Répertoire Général des Élèves</h3>
@@ -164,7 +164,7 @@
                   {{ eleve.prenom }} {{ eleve.nom }}
                 </td>
                 <td class="py-3 px-4 text-gray-400">
-                  {{ eleve.classe?.libelle || eleve.classe_nom || 'Non défini' }}
+                  {{ eleve.classe ? eleve.classe.niveau + ' ' + eleve.classe.diminutif : 'Non défini' }}
                 </td>
                 <td class="py-3 px-4 text-center">
                   <span 
@@ -209,15 +209,29 @@ const fichierSelectionne = ref(null);
 
 const elevesFiltrés = computed(() => {
   const query = termeRecherche.value.toLowerCase().trim();
-  if (!query) {
-    return elevesList.value;
-  }
+  if (!query) return elevesList.value; // affiche tout si recherche vide
+  
   return elevesList.value.filter(eleve => {
-    const nomComplet = `${eleve.prenom} ${eleve.nom}`.toLowerCase();
-    const matricule = (eleve.matricule || '').toLowerCase();
-    return nomComplet.includes(query) || matricule.includes(query);
+    const nomComplet = `${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.toLowerCase();
+    const matricule = (eleve.matricule ?? '').toLowerCase();
+    const classe = eleve.classe 
+      ? `${eleve.classe.niveau} ${eleve.classe.diminutif}`.toLowerCase() 
+      : '';
+    return nomComplet.includes(query) || matricule.includes(query) || classe.includes(query);
   });
 });
+
+const fetchEleves = async () => {
+  try {
+    const token = localStorage.getItem('auth_token');
+    const response = await axios.get('/api/v1/eleves', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    elevesList.value = response.data;
+  } catch (err) {
+    console.error('Erreur chargement élèves :', err);
+  }
+};
 
 // 1. Charger les statistiques (KPIs) ET la liste des élèves
 const fetchStats = async () => {
@@ -258,6 +272,7 @@ onMounted(() => {
     userProfile.value.name = localStorage.getItem('user_name') || 'Gestionnaire ISI';
     userProfile.value.email = localStorage.getItem('user_email') || '';
     
+    fetchEleves();
     fetchStats();
     fetchAnnonces();
 });
