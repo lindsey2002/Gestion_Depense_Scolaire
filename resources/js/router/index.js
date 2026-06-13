@@ -35,13 +35,13 @@ const routes = [
     {
         path: '/admin/gestionclasses',
         name: 'GestionClasses',
-        component: GestionClasses, // Gardé tel quel selon ton import du haut
+        component: GestionClasses, 
         meta: { requiresAuth: true, role: 'admin' }
     },
     {
         path: '/admin/gestionvagues',
         name: 'GestionVagues',
-        component: GestionVagues, // Gardé tel quel selon ton import du haut
+        component: GestionVagues, 
         meta: { requiresAuth: true, role: 'admin' }
     },
     {
@@ -61,7 +61,7 @@ const routes = [
     {
         path: '/compta/dashboard',
         name: 'ComptaDashboard',
-        component: DashboardCompta, // Gardé tel quel selon ton import du haut
+        component: DashboardCompta, 
         meta: { requiresAuth: true, role: 'comptable' }
     },
     {

@@ -69,7 +69,6 @@ const router = useRouter();
 const searchQuery = ref('');
 const eleves = ref([]);
 
-// Récupération des élèves au chargement
 const fetchEleves = async () => {
   try {
     const token = localStorage.getItem('auth_token');
@@ -82,7 +81,6 @@ const fetchEleves = async () => {
   }
 };
 
-// Filtrage dynamique
 const elevesFiltres = computed(() => {
   if (!searchQuery.value.trim()) return [];
   const recherche = searchQuery.value.toLowerCase().trim();
@@ -100,18 +98,15 @@ const elevesFiltres = computed(() => {
   });
 });
 
-// ACTION CLIC : Redirection vers la page de paiement avec l'ID
 const redirigerVersPaiement = (id) => {
   if (!id) return;
   router.push({ name: 'compta.paiement', params: { id: id } });
 };
 
-// ACTION TOUCHE ENTRÉE : Si un seul élève est trouvé, on valide automatiquement
 const validerParEntree = () => {
   if (elevesFiltres.value.length === 1) {
     redirigerVersPaiement(elevesFiltres.value[0].id);
   } else if (elevesFiltres.value.length > 1) {
-    // Si plusieurs élèves correspondent, on prend le tout premier de la liste par défaut
     redirigerVersPaiement(elevesFiltres.value[0].id);
   }
 };

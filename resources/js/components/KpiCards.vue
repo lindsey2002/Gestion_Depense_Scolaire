@@ -71,7 +71,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-// Variable réactive qui contiendra les données de la base de données
 const stats = ref({
   totalEtudiants: 0,
   totalClasses: 0,
@@ -79,12 +78,10 @@ const stats = ref({
   totalRecettes: '0'
 })
 
-// Fonction qui se lance automatiquement à l'ouverture de la page
 onMounted(async () => {
   try {
     const token = localStorage.getItem('auth_token') 
 
-    // 2. On l'envoie au fetch
     const response = await fetch('/api/v1/dashboard/stats', {
       method: 'GET',
       headers: {
@@ -95,7 +92,6 @@ onMounted(async () => {
     }) 
     if (response.ok) {
       const data = await response.json()
-      // On extrait uniquement le bloc 'kpis' créé dans ton contrôleur PHP
       stats.value = data.kpis
     }
   } catch (error) {

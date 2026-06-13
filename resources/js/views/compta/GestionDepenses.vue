@@ -171,7 +171,6 @@
 import { onMounted, ref, computed } from 'vue';
 import { useGestionDepense } from '@/views/compta/useGestionDepense.js';
 
-// Destructuration de la logique externe
 const {
   depenses, totalRecettes, loading, loadingBtn, error, successMessage,
   estEnModeEdition, form, totalDepenses, soldeCaisse,
@@ -179,10 +178,8 @@ const {
   activerEdition, annulerEdition, formatCurrency
 } = useGestionDepense();
 
-// 💡 Variables locales pour gérer le filtrage réactif
 const categorieSelectionnee = ref('toutes');
 
-// 💡 Propriété calculée pour filtrer le tableau à la volée
 const depensesFiltrees = computed(() => {
   if (categorieSelectionnee.value === 'toutes') {
     return depenses.value;

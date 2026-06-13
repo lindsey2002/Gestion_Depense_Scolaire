@@ -71,7 +71,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-// Données fictives initiales (remplacées par la BD au chargement)
 const inscriptionsMensuelles = ref([
   { mois: 'Oct', total: 0 }, { mois: 'Nov', total: 0 }, { mois: 'Déc', total: 0 },
   { mois: 'Jan', total: 0 }, { mois: 'Fév', total: 0 }, { mois: 'Mar', total: 0 }
@@ -83,7 +82,6 @@ const statutPaiements = ref({
   totalEnRetard: 0
 })
 
-// Trouver la valeur maximale pour calibrer la hauteur des barres en %
 const calculerHauteurBarre = (total) => {
   const max = Math.max(...inscriptionsMensuelles.value.map(b => b.total), 1)
   return (total / max) * 100
@@ -93,7 +91,6 @@ onMounted(async () => {
   try {
     const token = localStorage.getItem('auth_token') 
 
-    // 2. On l'envoie au fetch
     const response = await fetch('/api/v1/dashboard/stats', {
       method: 'GET',
       headers: {
@@ -104,7 +101,6 @@ onMounted(async () => {
     })
     if (response.ok) {
       const data = await response.json()
-      // On récupère les inscriptions et les paiements stockés dans le bloc 'charts'
       inscriptionsMensuelles.value = data.charts.inscriptions
       statutPaiements.value = data.charts.paiements
     }

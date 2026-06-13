@@ -61,7 +61,6 @@ onMounted(async () => {
   try {
     const token = localStorage.getItem('auth_token') 
 
-    // 2. On l'envoie au fetch
     const response = await fetch('/api/v1/dashboard/stats', {
       method: 'GET',
       headers: {
@@ -72,7 +71,6 @@ onMounted(async () => {
     })
     if (response.ok) {
       const data = await response.json()
-      // On extrait le tableau 'classes' formaté par ton contrôleur PHP
       classes.value = data.classes
     }
   } catch (error) {

@@ -123,7 +123,7 @@ export function useGestionPaiements() {
         }
 
         // ÉTAPE C : Si le mois n'est pas payé et que tout le passé est clean, il est disponible
-        return 'payable'; // ➔ Couleur BLEU VIF / ACTIF
+        return 'payable'; 
     };
 
     // ==========================================
@@ -132,13 +132,11 @@ export function useGestionPaiements() {
     const toggleMois = (nomMois) => {
         const statut = getStatutMois(nomMois);
         
-        // Sécurité : si le mois est déjà payé ou bloqué par la chronologie, on stoppe l'action
         if (statut === 'paye' || statut === 'bloque') return;
 
         const index = moisSelectionnes.value.indexOf(nomMois);
 
         if (index > -1) {
-            // Si le comptable décoche un mois, on retire aussi automatiquement tous les mois qui le suivent
             const indexDansVague = moisDeLaVague.value.indexOf(nomMois);
             moisSelectionnes.value = moisSelectionnes.value.filter(m => {
                 return moisDeLaVague.value.indexOf(m) < indexDansVague;
@@ -148,7 +146,6 @@ export function useGestionPaiements() {
             moisSelectionnes.value.push(nomMois);
         }
 
-        // Synchronisation immédiate du formulaire et recalcul automatique de la somme globale
         form.value.mois = moisSelectionnes.value;
         form.value.montant = moisSelectionnes.value.length * (currentEleve.value.classe?.tarif_mensuel || 0);
     };
@@ -161,12 +158,10 @@ export function useGestionPaiements() {
         selectedEleveId.value = eleve.id;
         form.value.eleve_id = eleve.id;
         
-        // Reset des sélections précédentes
         searchQuery.value = `${eleve.prenom} ${eleve.nom}`; // Remplit l'input avec le choix cliqué
         moisSelectionnes.value = [];
         form.value.mois = [];
 
-        // Configuration automatique du type de paiement initial selon le statut de l'élève
         if (eleve.statut === 'en_attente') {
             form.value.type_paiement = 'inscription';
             form.value.montant = eleve.classe?.frais_inscription || 0;
@@ -176,7 +171,6 @@ export function useGestionPaiements() {
         }
     };
 
-    // Réajustement des montants si le comptable force manuellement le changement de type de paiement
     const adaptAmount = () => {
         if (!currentEleve.value) return;
         

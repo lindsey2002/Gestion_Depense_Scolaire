@@ -190,7 +190,6 @@ const genererMoisVague = (enfant) => {
     'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août'
   ];
 
-  // Si pas de vague trouvée, on retourne une année scolaire standard de 9 mois par défaut par sécurité
   if (!enfant.classe || !enfant.classe.vague) {
     return ['Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
   }
@@ -198,7 +197,6 @@ const genererMoisVague = (enfant) => {
   const vague = enfant.classe.vague;
   const moisDebutNom = vague.nom.toLowerCase().trim();
   
-  // Trouve le mois de début correspondant dans notre référentiel
   const nomMoisTrouve = ordreMoisAnnee.find(m => moisDebutNom.includes(m)) || 'octobre';
   const indexDebut = ordreMoisAnnee.indexOf(nomMoisTrouve);
   
@@ -207,7 +205,6 @@ const genererMoisVague = (enfant) => {
 
   for (let i = 0; i < totalMois; i++) {
     const moisMinuscule = ordreMoisAnnee[(indexDebut + i) % 12];
-    // Met la première lettre en majuscule pour un affichage élégant à l'écran
     const moisFormate = moisMinuscule.charAt(0).toUpperCase() + moisMinuscule.slice(1);
     listeMoisGeneres.push(moisFormate);
   }
