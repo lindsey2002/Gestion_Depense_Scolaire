@@ -101,7 +101,7 @@ export function useGestionPaiements() {
         );
         
         if (dejaPayeEnBase) {
-            return 'paye'; // ➔ Couleur GRIS, strictement désactivé
+            return 'paye'; 
         }
 
         // ÉTAPE B : Règle du "Pas de saut" (Analyse chronologique)
@@ -122,7 +122,7 @@ export function useGestionPaiements() {
             }
         }
 
-        // ÉTAPE C : Si le mois n'est pas payé et que tout le passé est clean, il est disponible
+
         return 'payable'; 
     };
 

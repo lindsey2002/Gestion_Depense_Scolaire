@@ -1,59 +1,58 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+#  ISI-Scolarité : Plateforme de Gestion Académique & Comptable
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Une application web moderne, fluide et sécurisée de gestion administrative et financière pour les établissements scolaires. Conçue avec une architecture découplée (**API REST Laravel** & **Front-end Vue.js**), cette plateforme optimise le suivi de la scolarité à travers une synchronisation en temps réel entre l'administration, la comptabilité et les parents d'élèves.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+##  Objectifs du Projet
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+L'objectif de cette application est de digitaliser et de centraliser les flux métiers d'une école en remplaçant les processus manuels ou les fichiers Excel isolés par un système interconnecté et automatisé. 
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+L'application répond aux besoins de 3 acteurs clés :
+* **L'Administration / Directeur :** Supervision des effectifs, gestion des dossiers élèves et vision globale de la santé financière.
+* **Le Comptable :** Encaissement sécurisé des frais, gestion des dépenses et génération automatique des reçus uniques.
+* **Les Parents :** Un espace transparent pour suivre en temps réel l'état des mensualités de leurs enfants, le reste à payer et les notes/annonces de l'établissement.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+##  Les Points Forts de l'Application
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Gestion Flexible par "Vagues" :** Contrairement aux systèmes rigides, la grille de suivi des mensualités s'adapte automatiquement à la vague d'intégration de l'étudiant (ex: Vague Octobre, Vague Janvier) et génère dynamiquement le nombre de mois dus. *(Inspiré du modèle de référence de l'UNCHK).*
+* **Sécurité Métier Stricte (Rôles Hermétiques) :** L'administration supervise, mais **seul le comptable** possède les droits d'écriture sur la caisse (`POST /paiements`). Les doublons de paiement pour un même mois sont bloqués mathématiquement en base de données.
+* **Synchronisation Vue <-> API en Temps Réel :** Dès qu'un paiement est validé à la caisse, le tableau de bord du parent recalcule instantanément le reste à payer global et met à jour les badges de suivi (passage du rouge au vert).
+* **Architecture Évolutive :** Une base de données optimisée et centralisée, idéale pour de futures extensions en **Data Science** (ex: analyse prédictive des risques d'impayés).
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+##  Stack Technique
 
-### Premium Partners
+* **Backend :** Laravel (PHP) - API RESTful sécurisée par jetons (Sanctum/Bearer Tokens).
+* **Frontend :** Vue.js (JavaScript) - Single Page Application (SPA) rapide et interface responsive (Tailwind CSS).
+* **Base de Données :** MySQL.
+* **Export :** Intégration de Maatwebsite Excel pour l'extraction des journaux comptables.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+##  Installation et Configuration
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 1. Prérequis
+* PHP (version >= 8.1)
+* Composer
+* Node.js & NPM
+* MySQL
 
-## Code of Conduct
+### 2. Configuration du Backend (Laravel)
+1. Naviguez dans le dossier backend et installez les dépendances :
+   ```bash
+   composer install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   cp .env.example .env
+   php artisan serve
+   npm install
+   npm run dev
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+   // Zone exclusive au Comptable (Sécurité financière)
+Route::middleware('role:comptable')->group(function () {
+    Route::post('/paiements', [PaiementController::class, 'store']);
+    Route::apiResource('depenses', DepenseController::class);
+});

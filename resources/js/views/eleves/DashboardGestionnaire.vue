@@ -119,7 +119,7 @@
 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg w-full">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-700 pb-4 mb-4">
           <div>
-            <h3 class="text-lg font-semibold text-white">🗂️ Répertoire Général des Élèves</h3>
+            <h3 class="text-lg font-semibold text-white"> Répertoire Général des Élèves</h3>
             <p class="text-xs text-gray-400 mt-0.5">Vérification instantanée de l'inscription d'un apprenant.</p>
           </div>
           

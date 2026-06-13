@@ -34,13 +34,6 @@ class DatabaseSeeder extends Seeder
             'role' => 'comptable',
         ]);
 
-        $parent = User::create([
-            'name' => 'Parent',
-            'email' => 'parent@ecole.com',
-            'password' => Hash::make('passer123'),
-            'role' => 'parent',
-        ]);
-
         Depense::create([
             'categorie' => 'Fournitures',
             'montant' => 15000,

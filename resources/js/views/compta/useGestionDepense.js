@@ -50,7 +50,7 @@ export function useGestionDepense() {
       depenses.value = resDepenses.data;
 
       // 2. Simulation ou récupération du fond de caisse (Modifie 500000 quand ton API Recettes sera prête)
-      totalRecettes.value = 500000; 
+      totalRecettes.value = 50000; 
 
     } catch (err) {
       console.error(err);

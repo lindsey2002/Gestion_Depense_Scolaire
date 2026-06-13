@@ -1,6 +1,17 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
     <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-md space-y-6">
+      <div class="mb-4">
+      <button 
+        @click="$router.push('/')" 
+        class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors group"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Retour à l'accueil
+      </button>
+    </div>
       <h2 class="text-2xl font-bold text-center text-gray-800">Connexion</h2>
       
       <div v-if="error" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-semibold">
