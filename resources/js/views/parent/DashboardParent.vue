@@ -23,7 +23,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="p-6 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
           <div class="p-3 bg-sky-50 text-sky-600 rounded-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 width-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
           </div>
           <div>
             <p class="text-sm text-gray-500 font-medium">Nombre d'enfants</p>
@@ -33,7 +33,7 @@
 
         <div class="p-6 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
           <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 width-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
           </div>
           <div>
             <p class="text-sm text-gray-500 font-medium">Total Dépensé (Payé)</p>
@@ -43,7 +43,7 @@
 
         <div class="p-6 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
           <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 width-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
           <div>
             <p class="text-sm text-gray-500 font-medium">Reste à payer</p>
@@ -72,7 +72,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4 text-xs">
               <div class="p-3 bg-slate-50 rounded-xl">
                 <p class="text-gray-400 mb-1">Classe</p>
-                <p class="font-bold text-gray-800">{{ enfant.classe }}</p>
+                <p class="font-bold text-gray-800">{{ enfant.classe?.libelle || 'Non assignée' }}</p>
               </div>
               <div class="p-3 bg-slate-50 rounded-xl">
                 <p class="text-gray-400 mb-1">Frais Inscription</p>
@@ -89,15 +89,24 @@
             </div>
 
             <div v-if="enfant.statut === 'inscrit'">
-              <p class="text-xs font-semibold text-gray-600 mb-2">Historique des mensualités :</p>
+              <p class="text-xs font-semibold text-gray-600 mb-2">Suivi et état des mensualités :</p>
+              
               <div class="flex flex-wrap gap-2">
-                <span v-for="mois in enfant.details_financiers.mois_payes" :key="mois" 
-                      class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold rounded-lg uppercase tracking-wider">
-                  ✓ {{ mois }}
+                <span 
+                  v-for="mois in genererMoisVague(enfant)" 
+                  :key="mois" 
+                  class="px-2.5 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wider transition-colors border flex items-center gap-1.5"
+                  :class="enfant.details_financiers.mois_payes.includes(mois.toLowerCase()) 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : 'bg-rose-50 text-rose-700 border-rose-200'"
+                >
+                  <span 
+                    class="w-1.5 h-1.5 rounded-full" 
+                    :class="enfant.details_financiers.mois_payes.includes(mois.toLowerCase()) ? 'bg-emerald-500' : 'bg-rose-500'"
+                  ></span>
+                  
+                  {{ enfant.details_financiers.mois_payes.includes(mois.toLowerCase()) ? '✓' : '✗' }} {{ mois }}
                 </span>
-                <p v-if="enfant.details_financiers.mois_payes.length === 0" class="text-xs text-gray-400 italic">
-                  Aucun mois payé pour le moment.
-                </p>
               </div>
             </div>
           </div>
@@ -145,6 +154,13 @@ const annonces = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
+
+const moisAnneeScolaire = [
+  'Octobre', 'Novembre', 'Décembre', 'Janvier', 
+  'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet',
+  'Aout', 'Septembre'
+];
+
 const fetchParentData = async () => {
   try {
     loading.value = true;
@@ -166,6 +182,37 @@ const fetchParentData = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const genererMoisVague = (enfant) => {
+  const ordreMoisAnnee = [
+    'septembre', 'octobre', 'novembre', 'décembre', 
+    'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août'
+  ];
+
+  // Si pas de vague trouvée, on retourne une année scolaire standard de 9 mois par défaut par sécurité
+  if (!enfant.classe || !enfant.classe.vague) {
+    return ['Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
+  }
+
+  const vague = enfant.classe.vague;
+  const moisDebutNom = vague.nom.toLowerCase().trim();
+  
+  // Trouve le mois de début correspondant dans notre référentiel
+  const nomMoisTrouve = ordreMoisAnnee.find(m => moisDebutNom.includes(m)) || 'octobre';
+  const indexDebut = ordreMoisAnnee.indexOf(nomMoisTrouve);
+  
+  const listeMoisGeneres = [];
+  const totalMois = vague.nombre_mois || 9;
+
+  for (let i = 0; i < totalMois; i++) {
+    const moisMinuscule = ordreMoisAnnee[(indexDebut + i) % 12];
+    // Met la première lettre en majuscule pour un affichage élégant à l'écran
+    const moisFormate = moisMinuscule.charAt(0).toUpperCase() + moisMinuscule.slice(1);
+    listeMoisGeneres.push(moisFormate);
+  }
+
+  return listeMoisGeneres;
 };
 
 const formatDevise = (valeur) => {

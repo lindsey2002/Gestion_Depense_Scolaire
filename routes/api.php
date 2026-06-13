@@ -60,15 +60,17 @@ Route::prefix('v1')->group(function(){
             Route::delete('/eleves/{id}', [EleveController::class, 'destroy']);
             Route::get('/eleves/{id}/historique', [EleveController::class, 'historique']);
 
-            Route::get('/paiements', [PaiementController::class, 'index']);
-            Route::post('/paiements', [PaiementController::class, 'store']);
-
             Route::get('/depenses/export', [DepenseController::class, 'exportExcel']);
-            Route::apiResource('depenses', DepenseController::class)->only(['index', 'store', 'update','destroy']);
-
+            
             Route::get('/compta/exporter-excel', [PaiementController::class, 'exportExcel']);
 
             
+        });
+        Route::middleware('role:comptable')->group(function () {
+            Route::get('/paiements', [PaiementController::class, 'index']);
+            Route::post('/paiements', [PaiementController::class, 'store']);
+
+            Route::apiResource('depenses', DepenseController::class)->only(['index', 'store', 'update','destroy']);
         });
         // 4. ESPACE  GESTIONNAIRE
         Route::middleware('role:gestionnaire')->group(function () {

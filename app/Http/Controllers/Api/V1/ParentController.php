@@ -3,58 +3,96 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Eleve;
-use App\Models\Annonce;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Eleve;
+use App\Models\Classe;
+use App\Models\Paiement;
+use App\Models\Annonce;
 
 class ParentController extends Controller
 {
-    public function getDashboardData(): JsonResponse
-    {
-        try {
-            $parentId = Auth::id();
+   public function getDashboardData(): JsonResponse
+{
+    try {
+        $parentId = Auth::id();
 
-            // 1. On récupère les enfants SANS AUCUNE RELATION pour éviter le crash
-            $enfants = Eleve::where('parent_id', $parentId)->get();
+        // Charge les relations nécessaires d'un coup
+        $enfants = Eleve::where('parent_id', $parentId)
+            ->with(['classe.vague', 'paiements'])
+            ->get();
 
-            $enfantsStats = [];
-            foreach ($enfants as $enfant) {
-                $enfantsStats[] = [
-                    'id' => $enfant->id,
-                    'matricule' => $enfant->matricule ?? 'En attente',
-                    'nom' => $enfant->prenom . ' ' . $enfant->nom,
-                    'classe' => 'Classe Test', // Écrit en dur temporairement
-                    'statut' => $enfant->statut,
-                    'details_financiers' => [
-                        'paye_inscription' => 0,
-                        'paye_mensualites' => 0,
-                        'total_depense' => 0,
-                        'reste_a_payer' => 0,
-                        'mois_payes' => []
-                    ]
-                ];
-            }
+        $totalDepense = 0;
+        $totalRestant = 0;
 
-            // 2. On récupère les annonces de manière sécurisée
-            $annonces = Annonce::latest()->take(5)->get();
+        $enfantsStats = [];
+        foreach ($enfants as $enfant) {
 
-            return response()->json([
-                'kpis_globaux' => [
-                    'nombre_enfants' => $enfants->count(),
-                    'total_general_depense' => 0,
-                    'total_general_restant' => 0,
-                ],
-                'enfants' => $enfantsStats,
-                'annonces' => $annonces
-            ], 200);
+            // --- CLASSE ---
+            $classe = $enfant->classe; // objet complet avec vague
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-                'line' => $e->getLine()
-            ], 500);
+            // --- CALCUL FINANCIER ---
+            $payeInscription = $enfant->paiements
+                ->where('type_paiement', 'inscription')
+                ->sum('montant');
+
+            $payeMensualites = $enfant->paiements
+                ->where('type_paiement', 'mensualite')
+                ->sum('montant');
+
+            $moisPayes = $enfant->paiements
+                ->where('type_paiement', 'mensualite')
+                ->pluck('mois')
+                ->toArray();
+
+            // Reste à payer = (nb_mois * tarif_mensuel) - déjà payé en mensualités
+            $nbrMois   = $classe?->vague?->nombre_mois ?? 9;
+            $tarifMois = $classe?->tarif_mensuel ?? 0;
+            $resteAPayer = ($nbrMois * $tarifMois) - $payeMensualites;
+
+            $totalDepense += $payeInscription + $payeMensualites;
+            $totalRestant += $resteAPayer;
+
+            $enfantsStats[] = [
+                'id'        => $enfant->id,
+                'matricule' => $enfant->matricule ?? 'En attente',
+                'nom'       => $enfant->prenom . ' ' . $enfant->nom,
+                'statut'    => $enfant->statut,
+                // On renvoie l'objet classe entier (avec vague) pour le Vue
+                'classe'    => $classe ? [
+                    'libelle' => $classe->niveau . ' ' . $classe->diminutif,
+                    'vague'   => $classe->vague ? [
+                        'nom'        => $classe->vague->nom,
+                        'nombre_mois'=> $classe->vague->nombre_mois,
+                    ] : null,
+                ] : null,
+                'details_financiers' => [
+                    'paye_inscription'  => $payeInscription,
+                    'paye_mensualites'  => $payeMensualites,
+                    'total_depense'     => $payeInscription + $payeMensualites,
+                    'reste_a_payer'     => max(0, $resteAPayer),
+                    'mois_payes'        => array_map('strtolower', $moisPayes),
+                ]
+            ];
         }
+
+        $annonces = Annonce::latest()->take(5)->get();
+
+        return response()->json([
+            'kpis_globaux' => [
+                'nombre_enfants'        => $enfants->count(),
+                'total_general_depense' => $totalDepense,
+                'total_general_restant' => $totalRestant,
+            ],
+            'enfants'  => $enfantsStats,
+            'annonces' => $annonces,
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => $e->getMessage(),
+            'line'    => $e->getLine()
+        ], 500);
     }
+}
 }

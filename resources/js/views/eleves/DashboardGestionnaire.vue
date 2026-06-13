@@ -115,17 +115,85 @@
   </div>
 
 </div>
-    </main>
 
+<div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg w-full">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-700 pb-4 mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-white">🗂️ Répertoire Général des Élèves</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Vérification instantanée de l'inscription d'un apprenant.</p>
+          </div>
+          
+          <div class="w-full sm:w-80 relative">
+            <input 
+              v-model="termeRecherche" 
+              type="text" 
+              placeholder="Rechercher par nom, prénom, matricule..." 
+              class="w-full bg-gray-900 border border-gray-700 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-emerald-500 transition-colors"
+            />
+            <span class="absolute left-3 top-2.5 text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div v-if="elevesList.length === 0" class="text-center py-8 text-gray-500 text-sm">
+          Aucun élève enregistré dans le système.
+        </div>
+        <div v-else-if="elevesFiltrés.length === 0" class="text-center py-8 text-amber-400/80 text-sm">
+          ⚠️ Aucun élève ne correspond à votre recherche.
+        </div>
+
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-900/60 text-[11px] uppercase tracking-wider text-gray-400 border-b border-gray-700">
+                <th class="py-3 px-4 font-semibold">Matricule</th>
+                <th class="py-3 px-4 font-semibold">Nom Complet</th>
+                <th class="py-3 px-4 font-semibold">Classe affectée</th>
+                <th class="py-3 px-4 font-semibold text-center">Statut Inscription</th>
+              </tr>
+            </thead>
+            <tbody class="text-xs divide-y divide-gray-700/50 text-gray-300">
+              <tr v-for="eleve in elevesFiltrés" :key="eleve.id" class="hover:bg-gray-700/30 transition-colors">
+                <td class="py-3 px-4 font-mono text-emerald-400 font-bold tracking-wider">
+                  {{ eleve.matricule || 'NON ASSIGNÉ' }}
+                </td>
+                <td class="py-3 px-4 font-medium text-white">
+                  {{ eleve.prenom }} {{ eleve.nom }}
+                </td>
+                <td class="py-3 px-4 text-gray-400">
+                  {{ eleve.classe?.libelle || eleve.classe_nom || 'Non défini' }}
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span 
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border"
+                    :class="eleve.statut === 'inscrit' 
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                      : 'bg-amber-500/10 text-amber-400 border-amber-500/20'"
+                  >
+                    ● {{ eleve.statut }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue'; // Import unique et propre ici
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const router = useRouter();
+const elevesList = ref([]);
+const termeRecherche = ref('');
 const userProfile = ref({ name: 'Gestionnaire', email: '' });
 
 // KPIs Statistiques
@@ -139,7 +207,19 @@ const nouveauTitre = ref('');
 const nouveauContenu = ref('');
 const fichierSelectionne = ref(null);
 
-// 1. Charger les statistiques (KPIs)
+const elevesFiltrés = computed(() => {
+  const query = termeRecherche.value.toLowerCase().trim();
+  if (!query) {
+    return elevesList.value;
+  }
+  return elevesList.value.filter(eleve => {
+    const nomComplet = `${eleve.prenom} ${eleve.nom}`.toLowerCase();
+    const matricule = (eleve.matricule || '').toLowerCase();
+    return nomComplet.includes(query) || matricule.includes(query);
+  });
+});
+
+// 1. Charger les statistiques (KPIs) ET la liste des élèves
 const fetchStats = async () => {
     try {
         const token = localStorage.getItem('auth_token');
@@ -153,12 +233,15 @@ const fetchStats = async () => {
             totalClasses.value = dataKpis.totalClasses || 0;
             nouvellesInscriptions.value = dataKpis.totalEtudiants || 0;
         }
+
+        if (response.data && response.data.eleves) {
+            elevesList.value = response.data.eleves;
+        }
     } catch (err) {
         console.error("Erreur lors du chargement des KPIs du gestionnaire:", err);
     }
 };
 
-// 2. Charger les annonces existantes
 const fetchAnnonces = async () => {
     try {
         const token = localStorage.getItem('auth_token');
@@ -171,7 +254,6 @@ const fetchAnnonces = async () => {
     }
 };
 
-// UN UNIQUE onMounted pour tout initialiser proprement au chargement du composant
 onMounted(() => {
     userProfile.value.name = localStorage.getItem('user_name') || 'Gestionnaire ISI';
     userProfile.value.email = localStorage.getItem('user_email') || '';
@@ -215,7 +297,6 @@ const publierAnnonce = async () => {
         
         fetchAnnonces();
     } catch (err) {
-        // MODIFICATION ICI : On inspecte les entrailles de la réponse Laravel
         if (err.response && err.response.data) {
             console.error("VRAIE ERREUR DU SERVEUR LARAVEL :", err.response.data);
         } else {
@@ -228,7 +309,6 @@ const gererDeconnexion = async () => {
   try {
     const token = localStorage.getItem('auth_token')
     
-    // 1. On avertit le serveur pour invalider le token
     await fetch('/api/v1/logout', {
       method: 'POST',
       headers: {
@@ -241,8 +321,6 @@ const gererDeconnexion = async () => {
   } finally {
     localStorage.removeItem('auth_token')
     localStorage.removeItem('user_role')
-    
-    // 3. Redirection immédiate vers la page de connexion
     router.push('/login') 
   }
 }
