@@ -75,9 +75,11 @@ Route::prefix('v1')->group(function(){
 
             Route::apiResource('depenses', DepenseController::class)->only(['index', 'store', 'update','destroy']);
         });
+        Route::middleware('role:admin,comptable,gestionnaire')->group(function () {
+            Route::get('/eleves', [EleveController::class, 'index']);
+        });
         // 4. ESPACE  GESTIONNAIRE
         Route::middleware('role:gestionnaire')->group(function () {
-            Route::get('/eleves', [EleveController::class, 'index']);
             Route::post('/eleves', [EleveController::class, 'store']);
             Route::get('/annonces', function() {
                 return response()->json(\App\Models\Annonce::latest()->get());

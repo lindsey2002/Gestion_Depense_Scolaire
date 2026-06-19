@@ -168,7 +168,7 @@
         <footer class="border-t border-gray-800 bg-gray-950/40 py-6 mt-12">
             <div class="max-w-7xl w-full mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500 font-medium">
                 <p>© 2026 ISI GESTION. Tous droits réservés.</p>
-                <p>Mémoire de fin d'études réalisé pour la validation de la <span class="text-gray-400 font-bold">Licence 3</span></p>
+                <p>Projet de début de semestre réalisé pour la validation du module <span class="text-gray-400 font-bold">Laravel</span></p>
             </div>
         </footer>
     </div>
